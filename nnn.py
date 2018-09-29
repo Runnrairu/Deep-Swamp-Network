@@ -1,9 +1,5 @@
 ﻿# -*- coding: utf-8 -*-
-"""
-Created on Wed Sep 26 21:38:58 2018
 
-@author: 宮本来
-"""
 
 import _pickle as cPickle
 
