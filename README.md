@@ -20,7 +20,7 @@
  * ミルシュタインスキーム
  * あああああ
  
-  この5種類を用いて数値実験を行う。
+  この6種類を用いて数値実験を行う。
 　下４つの手法に関しては、<img src="https://latex.codecogs.com/gif.latex?dX_t=p(t)f(X_t)dt+\sqrt{p(t)(1-p(t))}f(X_t)dB_t" />というSDEの離散化を行う。
 
 
