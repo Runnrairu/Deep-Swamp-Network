@@ -14,6 +14,7 @@
 　用いるデータはCIFER10  
 　
  * ResNet(通常実装)
+ * Stochastic Depth(通常実装)
  * Stochastic Depth(簡易スキーム)
  * Euler-丸山スキーム
  * ミルシュタインスキーム
