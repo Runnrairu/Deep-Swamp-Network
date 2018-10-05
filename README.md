@@ -24,6 +24,9 @@
 　下４つの手法に関しては、<img src="https://latex.codecogs.com/gif.latex?dX_t=p(t)f(X_t)dt+\sqrt{p(t)(1-p(t))}f(X_t)dB_t" />というSDEの離散化を行う。
 
 
+## 考察　～離散化の安定性～
+
+
 
 # 参考文献
 [1]
