@@ -16,17 +16,27 @@ def tW_def(n,task_name):
         t,W = Fukasawa_scheme(T)
     elif task_name == "Simplicity_scheme":
         t,W = Simplicity_scheme(n,T)
-    elif task_name == "Euler_Maruyama_scheme":
+    elif task_name == "Euler_Maruyama_scheme" or task_name == "Milstein_scheme":
         t,W = Euler_Maruyama_scheme(n,T)
-    elif task_name == "Milstein_scheme":
-        t,W == Milstein_scheme(n,T)
+    elif task_name == "ODEnet":
+        t,W = ODEnet(n,T)
     else:
         print("Invarid!")
     return t,W
 
-def Fukasawa_scheme(T):
+def Fukasawa_scheme(T):#今回最も特殊なスキーム
     
     return t,W
+
+def ODEnet(n,T):#先行研究
+    delta_t = float(T)/n
+    t = [delta_t]*(n)
+    W = [0]*(n)
+    return t,W
+
+
+
+
 
 def Simplicity_scheme(n,T):
     delta_t = float(T)/n
@@ -45,11 +55,6 @@ def Euler_Maruyama_scheme(n,T):
     sigma = pow(delta_t,0.5)
     W = np.random.normal(0,sigma,n)
     return t,W
-
-
-def Milstein_scheme(n,T):
-    
-    retrun t,W
 
     
     
