@@ -16,13 +16,13 @@ def run():
     t = tf.placeholder("float", [None])
     W = tf.placeholder("float", [None])
     learning_rate = tf.placeholder("float", [])
+    
+    net = RF.model(X,t,W)
     cross_entropy = -tf.reduce_sum(Y*tf.log(net))
     opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
     train_op = opt.minimize(cross_entropy)
-    
     sess = tf.Session()
     sess.run(tf.initialize_all_variables())
-
     correct_prediction = tf.equal(tf.argmax(net, 1), tf.argmax(Y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
