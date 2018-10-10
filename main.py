@@ -13,6 +13,8 @@ def run():
     
     X = tf.placeholder("float", [batch_size, 32, 32, 3])
     Y = tf.placeholder("float", [batch_size, 10])
+    t = tf.placeholder("float", [None])
+    W = tf.placeholder("float", [None])
     learning_rate = tf.placeholder("float", [])
     cross_entropy = -tf.reduce_sum(Y*tf.log(net))
     opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
@@ -27,7 +29,7 @@ def run():
     saver = tf.train.Saver()
     for j in range (10):
         for i in range (0, 50000, batch_size):
-            t,W = RF.tW_def(10,Fukasawa_scheme)
+            t,W = RF.tW_def(10,"Fukasawa_scheme")
             feed_dict={
                 X: X_train[i:i + batch_size], 
                 Y: Y_train[i:i + batch_size],
@@ -41,6 +43,7 @@ def run():
 
     for i in range (0, 10000, batch_size):
         if i + batch_size < 10000:
+            t,W = RF.tW_def(10,"Fukasawa_scheme")
             acc = sess.run([accuracy],feed_dict={
                 X: X_test[i:i+batch_size],
                 Y: Y_test[i:i+batch_size],
