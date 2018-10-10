@@ -58,7 +58,7 @@ def Milstein_scheme(n,T):
 def conv2d(x, W):
     return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
     
-def SDE_model(X,t,W):
+def SDE_model(X,t,W,name):
     
     depth = len(t) #shape取得関数を調べてここで使う
     
@@ -71,7 +71,7 @@ def SDE_model(X,t,W):
     for i in range(depth):
         delta_t = t[i]
         delta_W = W[i]
-        X_image = Res_flow(X_image,t_now,delta_t,delta_W)
+        X_image = Res_flow(X_image,t_now,delta_t,delta_W,name)
         t_now += delta_t
     
     
@@ -96,20 +96,23 @@ def SDE_model(X,t,W):
     
 
 
-def ResFlow(inpt,t_now,delta_t,delta_w):
+def ResFlow(inpt,t_now,delta_t,delta_w,name):
     
-    f_x = Res_func(inpt)
+    f_x = Res_func(inpt,name)
     p_t = p(t)
     
-    return inpt+p_t*delta_t*f_x +np.pow(p_t*(1-p_t),0.5)*delta_w*f_x
+    if name == "Milstein_scheme":
+        return inpt+p_t*delta_t*f_x +np.pow(p_t*(1-p_t),0.5)*delta_w*f_x#ミルシュタインスキーム特有のやつ
+    else:
+        return inpt+p_t*delta_t*f_x +np.pow(p_t*(1-p_t),0.5)*delta_w*f_x
    
-def Res_func(inpt):
+def Res_func(inpt,name):
     W_conv1 = weight_variable([3, 3, 64, 64])
     b_conv1 = bias_variable([64])
     W_conv2 = weight_variable([3, 3, 64, 64])
     b_conv2 = bias_variable([64])
-   
-   
-   
-   
-   return output
+    
+    
+    
+    
+    return output
