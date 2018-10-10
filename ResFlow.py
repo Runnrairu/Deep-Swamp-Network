@@ -2,6 +2,13 @@
 import tensorflow as tf
 import numpy as np
 
+T = 1
+
+def p(t):
+    p_T = 0.4
+    return 1-t/T*(1-p_T)
+
+
 
 
 def tW_def(n,name):
