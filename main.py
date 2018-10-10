@@ -16,8 +16,9 @@ def run():
     t = tf.placeholder("float", [None])
     W = tf.placeholder("float", [None])
     learning_rate = tf.placeholder("float", [])
+    task_name = tf.placeholder("string")
     
-    net = RF.SDE_model(X,t,W,name)
+    net = RF.SDE_model(X,t,W,task_name)
     cross_entropy = -tf.reduce_sum(Y*tf.log(net))
     opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
     train_op = opt.minimize(cross_entropy)
@@ -36,7 +37,7 @@ def run():
                 learning_rate: 0.001,
                 time_list:t,
                 W_list:W,
-                name:"Fukasawa_scheme"}
+                task_name:"Fukasawa_scheme"}
             sess.run([train_op], feed_dict=feed_dict)
             if i % 512 == 0:
                 print "training on image #%d" % i
@@ -50,7 +51,7 @@ def run():
                 Y: Y_test[i:i+batch_size],
                 time_list:t,
                 W_list:W,
-                name:"Fukasawa_scheme"
+                task_name:"Fukasawa_scheme"
                 })
             accuracy_summary = tf.scalar_summary("accuracy", accuracy)
             print acc
