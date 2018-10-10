@@ -27,7 +27,7 @@ def run():
     saver = tf.train.Saver()
     for j in range (10):
         for i in range (0, 50000, batch_size):
-            t,W = RF.tW_def(Fukasawa_scheme)
+            t,W = RF.tW_def(10,Fukasawa_scheme)
             feed_dict={
                 X: X_train[i:i + batch_size], 
                 Y: Y_train[i:i + batch_size],
