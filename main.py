@@ -28,16 +28,17 @@ def run():
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
     saver = tf.train.Saver()
+    task_name = "Fukasawa_scheme"
     for j in range (10):
         for i in range (0, 50000, batch_size):
-            t,W = RF.tW_def(10,"Fukasawa_scheme")
+            t,W = RF.tW_def(10,task_name)
             feed_dict={
                 X: X_train[i:i + batch_size], 
                 Y: Y_train[i:i + batch_size],
                 learning_rate: 0.001,
                 time_list:t,
                 W_list:W,
-                task_name:"Fukasawa_scheme"}
+                task_name:task_name}
             sess.run([train_op], feed_dict=feed_dict)
             if i % 512 == 0:
                 print "training on image #%d" % i
@@ -45,7 +46,7 @@ def run():
 
     for i in range (0, 10000, batch_size):
         if i + batch_size < 10000:
-            t,W = RF.tW_def(10,"Fukasawa_scheme")
+            t,W = RF.tW_def(10,task_name)
             acc = sess.run([accuracy],feed_dict={
                 X: X_test[i:i+batch_size],
                 Y: Y_test[i:i+batch_size],
