@@ -11,14 +11,14 @@ def p(t):
 
 
 
-def tW_def(n,name):
-    if name == "Fukasawa_scheme":
+def tW_def(n,task_name):
+    if task_name == "Fukasawa_scheme":
         t,W = Fukasawa_scheme(T)
-    elif name == "Simplicity_scheme":
+    elif task_name == "Simplicity_scheme":
         t,W = Simplicity_scheme(n,T)
-    elif name == "Euler_Maruyama_scheme":
+    elif task_name == "Euler_Maruyama_scheme":
         t,W = Euler_Maruyama_scheme(n,T)
-    elif name == "Milstein_scheme":
+    elif task_name == "Milstein_scheme":
         t,W == Milstein_scheme(n,T)
     else:
         print("Invarid!")
@@ -58,7 +58,7 @@ def Milstein_scheme(n,T):
 def conv2d(x, W):
     return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
     
-def SDE_model(X,t,W,name):
+def SDE_model(X,t,W,task_name):
     
     depth = len(t) #shape取得関数を調べてここで使う
     
@@ -71,7 +71,7 @@ def SDE_model(X,t,W,name):
     for i in range(depth):
         delta_t = t[i]
         delta_W = W[i]
-        X_image = Res_flow(X_image,t_now,delta_t,delta_W,name)
+        X_image = Res_flow(X_image,t_now,delta_t,delta_W,task_name)
         t_now += delta_t
     
     
@@ -96,17 +96,17 @@ def SDE_model(X,t,W,name):
     
 
 
-def ResFlow(inpt,t_now,delta_t,delta_w,name):
+def ResFlow(inpt,t_now,delta_t,delta_w,task_name):
     
-    f_x = Res_func(inpt,name)
+    f_x = Res_func(inpt,task_name)
     p_t = p(t)
     
-    if name == "Milstein_scheme":
+    if task_name == "Milstein_scheme":
         return inpt+p_t*delta_t*f_x +np.pow(p_t*(1-p_t),0.5)*delta_w*f_x#ミルシュタインスキーム特有のやつ
     else:
         return inpt+p_t*delta_t*f_x +np.pow(p_t*(1-p_t),0.5)*delta_w*f_x
    
-def Res_func(inpt,name):
+def Res_func(inpt,task_name):
     W_conv1 = weight_variable([3, 3, 64, 64])
     b_conv1 = bias_variable([64])
     W_conv2 = weight_variable([3, 3, 64, 64])
