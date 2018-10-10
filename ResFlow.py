@@ -15,7 +15,7 @@ def tW_def(n,name):
     if name == "Fukasawa_scheme":
         t,W = Fukasawa_scheme(T)
     elif name == "Simplicity_scheme":
-        t,W = Simplicity_scheme(T)
+        t,W = Simplicity_scheme(n,T)
     elif name == "Euler_Maruyama_scheme":
         t,W = Euler_Maruyama_scheme(n,T)
     elif name == "Milstein_scheme":
@@ -28,15 +28,22 @@ def Fukasawa_scheme(T):
     
     return t,W
 
-def Simplicity_scheme(T):
+def Simplicity_scheme(n,T):
+    delta_t = float(T)/n
+    t = [delta_t]*(n)
+    sigma = pow(delta_t,0.5)
+    W = np.random.choice([-sigma,sigma], n, replace=True)
+    
     
     return t,W
 
 
 
-
 def Euler_Maruyama_scheme(n,T):
-    
+    delta_t = float(T)/n
+    t = [delta_t]*(n)
+    sigma = pow(delta_t,0.5)
+    W = np.random.normal(0,sigma,n)
     return t,W
 
 
@@ -44,7 +51,12 @@ def Milstein_scheme(n,T):
     
     retrun t,W
 
+    
+    
+    
 
+def conv2d(x, W):
+    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
     
 def SDE_model(X,t,W):
     
@@ -54,7 +66,7 @@ def SDE_model(X,t,W):
     b_conv = bias_variable([64])
     X_image = tf.reshape(X, [-1,32,32,1])
     
-    X_image = tf.nn.conv2d(x, W_conv, strides=[1, 1, 1, 1], padding='SAME')
+    X_image = conv2d(x, W_conv, strides=[1, 1, 1, 1], padding='SAME')
     t_now = 0
     for i in range(depth):
         delta_t = t[i]
@@ -70,13 +82,13 @@ def SDE_model(X,t,W):
     W_fc1 = weight_variable([7 * 7 * 64,4096 ])# ここの7はちゃんとプーリング後の大きさを正しく計算する。
     b_fc1 = bias_variable([4096])
     X_pool_flat = tf.reshape(X_pool, [-1, 7 * 7 * 64])#同じく
-    h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
+    X_fc1 = tf.nn.relu(tf.matmul(X_pool2_flat, W_fc1) + b_fc1)
 
 
     # 出力層　　　　　　　　　
     W_fc2 = weight_variable([4096, 10])
     b_fc2 = bias_variable([10])
-    y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
+    y_conv = tf.matmul(X_fc1, W_fc2) + b_fc2
 
     return y_conv #メインではこれがnetという名前になる 
     
