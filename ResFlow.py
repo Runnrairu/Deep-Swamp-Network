@@ -63,9 +63,10 @@ def variable1(shape,name):
     return tf.Variable(initial, name=name)
 
 def variable(shape,var_name):
-    with tf.variable_scope('scope',reuse=tf.AUTO_REUSE):
+    with tf.variable_scope(tf.get_variable_scope(), reuse=True):
         initial = tf.truncated_normal_initializer(shape, stddev=0.1)
         var = tf.get_variable(name=var_name,shape,initializer = initial)
+        tf.get_variable_scope().reuse_variables()
     return var
 
 
@@ -124,6 +125,9 @@ def Res_func(inpt,task_name):
     W_conv2 = variable([3, 3, 64, 64],"W_conv2")
     b_conv2 = variable([64],"b_conv2")
     
+    
+    inpt_ = tf.nn.relu(conv2d(inpt, W_conv1)+b_conv1)#バッチ正規化したい
+    output = conv2d(inpt, W_conv2)+b_conv2 #ここReluかますかは迷いどころ
     
     
     
