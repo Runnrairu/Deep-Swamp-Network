@@ -4,6 +4,7 @@ import numpy as np
 
 T = 1
 
+
 def p(t):
     p_T = 0.4
     return 1-t/T*(1-p_T)
@@ -13,7 +14,7 @@ def p(t):
 
 def tW_def(n,task_name):
     if task_name == "Fukasawa_scheme":
-        t,W = Fukasawa_scheme(T)
+        t,W = Fukasawa_scheme(n,T)
     elif task_name == "Simplicity_scheme":
         t,W = Simplicity_scheme(n,T)
     elif task_name == "Euler_Maruyama_scheme" or task_name == "Milstein_scheme":
@@ -24,7 +25,24 @@ def tW_def(n,task_name):
         print("Invarid!")
     return t,W
 
-def Fukasawa_scheme(T):#今回最も特殊なスキーム
+def G_n(pi_m):
+    return 
+
+
+
+def Fukasawa_scheme(n,T):#今回最も特殊なスキーム
+    
+    t = []
+    t_now=0
+    while(t):
+        N = np.random.normal()
+        E = np.random.exponential()
+        ab_N = np.absolute(N)
+        Z = ab_N*ab_N
+        G_nm = G_n(t_now)
+        t.append()
+    
+    
     
     return t,W
 
@@ -117,7 +135,7 @@ def ResFlow(inpt,t_now,delta_t,delta_w,task_name):
     p_t = p(t)
     
     if task_name == "Milstein_scheme":
-        return inpt+p_t*delta_t*f_x +np.pow(p_t*(1-p_t),0.5)*delta_w*f_x#ミルシュタインスキーム特有のやつ
+        return inpt+p_t*delta_t*f_x +np.pow(p_t*(1-p_t),0.5)*delta_w*f_x+()*(np.pow(delta_w,2)-delta_t)#ミルシュタインスキーム特有のやつ
     else:
         return inpt+p_t*delta_t*f_x +np.pow(p_t*(1-p_t),0.5)*delta_w*f_x
    
