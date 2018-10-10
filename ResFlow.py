@@ -57,7 +57,20 @@ def Milstein_scheme(n,T):
 
 def conv2d(x, W):
     return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
-    
+
+def variable1(shape,name):
+    initial = tf.truncated_normal(shape, stddev=0.1)
+    return tf.Variable(initial, name=name)
+
+def variable(shape,var_name):
+    with tf.variable_scope('scope'):
+        initial = tf.truncated_normal(shape, stddev=0.1)
+        var = tf.get_variable(initial,name=var_name)
+        tf.get_variable_scope().reuse_variables()
+    return var
+
+
+
 def SDE_model(X,t,W,task_name):
     
     depth = len(t) #shape取得関数を調べてここで使う
@@ -107,10 +120,10 @@ def ResFlow(inpt,t_now,delta_t,delta_w,task_name):
         return inpt+p_t*delta_t*f_x +np.pow(p_t*(1-p_t),0.5)*delta_w*f_x
    
 def Res_func(inpt,task_name):
-    W_conv1 = weight_variable([3, 3, 64, 64])
-    b_conv1 = bias_variable([64])
-    W_conv2 = weight_variable([3, 3, 64, 64])
-    b_conv2 = bias_variable([64])
+    W_conv1 = variable([3, 3, 64, 64],"W_conv1")
+    b_conv1 = variable([64],"b_conv1")
+    W_conv2 = variable([3, 3, 64, 64],"W_conv2")
+    b_conv2 = variable([64],"b_conv2")
     
     
     
