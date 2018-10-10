@@ -63,13 +63,22 @@ def SDE_model(X,t,W):
         t_now += delta_t
     
     
-    # 平均値プーリング
-    
+    # 最大値プーリング(平均値のほうがよくない？)
+    X_pool = tf.nn.max_pool(X_image, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME')
     
     # 全結合層
-    
-    
-    return net 
+    W_fc1 = weight_variable([7 * 7 * 64,4096 ])# ここの7はちゃんとプーリング後の大きさを正しく計算する。
+    b_fc1 = bias_variable([4096])
+    X_pool_flat = tf.reshape(X_pool, [-1, 7 * 7 * 64])#同じく
+    h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
+
+
+    # 出力層　　　　　　　　　
+    W_fc2 = weight_variable([4096, 10])
+    b_fc2 = bias_variable([10])
+    y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
+
+    return y_conv #メインではこれがnetという名前になる 
     
     
     
