@@ -58,9 +58,7 @@ def Milstein_scheme(n,T):
 def conv2d(x, W):
     return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 
-def variable1(shape,name):
-    initial = tf.truncated_normal(shape, stddev=0.1)
-    return tf.Variable(initial, name=name)
+
 
 def variable(shape,var_name):
     with tf.variable_scope('scope',reuse=tf.AUTO_REUSE):
