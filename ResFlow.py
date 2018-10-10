@@ -13,13 +13,13 @@ def p(t):
 
 def tW_def(n,name):
     if name == "Fukasawa_scheme":
-        t,W = Fukasawa_scheme(1)
+        t,W = Fukasawa_scheme(T)
     elif name == "Simplicity_scheme":
-        t,W = Simplicity_scheme(1)
+        t,W = Simplicity_scheme(T)
     elif name == "Euler_Maruyama_scheme":
-        t,W = Euler_Maruyama_scheme(n,1)
+        t,W = Euler_Maruyama_scheme(n,T)
     elif name == "Milstein_scheme":
-        t,W == Milstein_scheme(n,1)
+        t,W == Milstein_scheme(n,T)
     else:
         print("Invarid!")
     return t,W
