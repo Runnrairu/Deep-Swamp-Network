@@ -63,10 +63,9 @@ def variable1(shape,name):
     return tf.Variable(initial, name=name)
 
 def variable(shape,var_name):
-    with tf.variable_scope('scope'):
-        initial = tf.truncated_normal(shape, stddev=0.1)
-        var = tf.get_variable(initial,name=var_name)
-        tf.get_variable_scope().reuse_variables()
+    with tf.variable_scope('scope',reuse=tf.AUTO_REUSE):
+        initial = tf.truncated_normal_initializer(shape, stddev=0.1)
+        var = tf.get_variable(name=var_name,shape,initializer = initial)
     return var
 
 
