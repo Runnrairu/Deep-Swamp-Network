@@ -8,6 +8,11 @@ LEARNING_RATE = 1e-4
 DATASET_DIRECTORY = "datasets"
 MODEL_DIRECTORY = "model"
 GPU = 0
+task_name="Fukasawa_scheme"
+# task_name = "Simplicity_scheme"
+# task_name = "Euler_Maruyama_scheme"
+# task_name = "Milstein_scheme"
+# task_name = "ODEnet"
 
 
 def run():
@@ -39,14 +44,15 @@ def run():
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
     saver = tf.train.Saver()
-    task_name = "Fukasawa_scheme"
+    batch_size = args.batch_size
+    
     for j in range (10):
         for i in range (0, 50000, batch_size):
             t,W = RF.tW_def(10,task_name)
             feed_dict={
                 X: X_train[i:i + batch_size], 
                 Y: Y_train[i:i + batch_size],
-                learning_rate: 0.001,
+                learning_rate: args.learning_rate,
                 time_list:t,
                 W_list:W,
                 task_name:task_name}
@@ -63,7 +69,7 @@ def run():
                 Y: Y_test[i:i+batch_size],
                 time_list:t,
                 W_list:W,
-                task_name:"Fukasawa_scheme"
+                task_name:task_name,
                 })
             accuracy_summary = tf.scalar_summary("accuracy", accuracy)
             print acc
