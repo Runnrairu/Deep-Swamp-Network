@@ -5,9 +5,19 @@ import ResFlow as RF
 
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-4
+dataset_directory = "datasets"
+model_directory = "model"
+
 
 def run():
-    
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--model_directory', type=str, default=MODEL_DIRECTORY)
+    parser.add_argument('-dd', '--dataset_directory', type=str, default=DATASET_DIRECTORY)
+    parser.add_argument('-bs', '--batch_size', type=int, default=BATCH_SIZE)
+    parser.add_argument('-lr', '--learning_rate', type=float, default=LEARNING_RATE)
+    parser.add_argument('-g', '--gpu', type=int, default=GPU)
+    args = parser.parse_args()
+    directory_output = os.path.join(args.model_directory, args.experiment_id)
     
     X_train, Y_train, X_test, Y_test = load_data.load()
     
