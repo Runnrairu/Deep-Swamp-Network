@@ -5,8 +5,8 @@ import ResFlow as RF
 
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-4
-dataset_directory = "datasets"
-model_directory = "model"
+DATASET_DIRECTORY = "datasets"
+MODEL_DIRECTORY = "model"
 GPU = 0
 
 
