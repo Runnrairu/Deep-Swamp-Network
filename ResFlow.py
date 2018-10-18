@@ -107,11 +107,11 @@ def variable(shape,var_name):
 
 def SDE_model(X,t,W,task_name):
     
-    depth = len(t) #shape取得関数を調べてここで使う
+    depth = len(t) 
     
     W_conv = weight_variable([5, 5, 3, 64],"W_conv")
     b_conv = bias_variable([64],"b_conv")
-    X_image = tf.reshape(X, [-1,32,32,1])
+    X_image = tf.reshape(X, [-1,32,32,3])
     
     X_image = conv2d(x, W_conv, strides=[1, 1, 1, 1], padding='SAME')
     t_now = 0
