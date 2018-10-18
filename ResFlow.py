@@ -4,12 +4,16 @@ import numpy as np
 
 T = 1
 
-
+d=32*32*64
 def p(t):
     p_T = 0.4
     return 1-t/T*(1-p_T)
 
+def G(t):#Fukasawa_schemeで使用
+    return 1.0
 
+def G_nm(n,t_now):
+    return float(1)/(G(t)*n)
 
 
 def tW_def(n,task_name):
@@ -25,25 +29,35 @@ def tW_def(n,task_name):
         print("Invarid!")
     return t,W
 
-def G_n(pi_m):
-    return 
+
 
 
 
 def Fukasawa_scheme(n,T):#今回最も特殊なスキーム
     
-    t = []
+    t = [0]*(n)
+    W=[0]*(n)
     t_now=0
-    while(t):
+    m=0
+    a= pow(1+2.0/d,1+d/2.0)
+    
+    while(t_now < (T-G_nm(n,t_now))):
         N = np.random.normal()
         E = np.random.exponential()
         ab_N = np.absolute(N)
-        Z = ab_N*ab_N
-        G_nm = G_n(t_now)
-        t.append()
-    
-    
-    
+        Z = ab_N*ab_N+2*E/d
+        G__nm = G_nm(t_now)
+        delta_t = G__nm*np.exp(-Z)
+        t[n]= delta_t
+        t_now +=delta_t
+        W[n] = pow(G__nm*a*d*Z*np.exp(-Z),0.5)*N/ab_N
+        m+=1
+    if m<n:
+        delta_euler_t = (T-t_now)/(n-m) 
+        sigma_euler_t = pow(delta_euler_t,0.5)
+        for i in range(n-m):
+            t[m+i] = delta_euler_t
+            W[m+i] = np.random.normal(0,sigma_euler_t) 
     return t,W
 
 def ODEnet(n,T):#先行研究
