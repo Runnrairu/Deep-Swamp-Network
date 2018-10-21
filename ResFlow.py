@@ -1,8 +1,9 @@
+
 # -*- coding: utf-8 -*-
 import tensorflow as tf
 import numpy as np
 
-T = 1
+T = 1.0
 
 d=32*32*64
 def p(t):
@@ -99,7 +100,7 @@ def conv2d(x, W):
 
 def variable(shape,var_name):
     with tf.variable_scope('scope',reuse=tf.AUTO_REUSE):
-        initial = tf.truncated_normal_initializer(shape, stddev=0.1)
+        initial = tf.truncated_normal_initializer( stddev=0.1)
         var = tf.get_variable(name=var_name,shape=shape,initializer = initial)
     return var
 
@@ -107,13 +108,13 @@ def variable(shape,var_name):
 
 def SDE_model(X,t,W,task_name):
     
-    depth = t.get_shape
+    depth =52
     
     W_conv = variable([5, 5, 3, 64],"W_conv")
     b_conv = variable([64],"b_conv")
     X_image = tf.reshape(X, [-1,32,32,3])
     
-    X_image = conv2d(x, W_conv, strides=[1, 1, 1, 1], padding='SAME')
+    X_image = conv2d(X_image, W_conv)
     t_now = 0
     for i in range(depth):
         delta_t = t[i]
@@ -123,13 +124,13 @@ def SDE_model(X,t,W,task_name):
     
     
     # 最大値プーリング(平均値のほうがよくない？)
-    X_pool = tf.nn.max_pool(X_image, ksize=[1, 4, 4, 1],strides=[1, 4, 4, 1])
+    X_pool = tf.nn.max_pool(X_image, ksize=[1, 4, 4, 1],strides=[1, 4, 4, 1],padding = "VALID")
     
     # 全結合層
     W_fc1 = variable([8* 8 * 64,4096],"w_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
     b_fc1 = variable([4096],"b_fc1")
     X_pool_flat = tf.reshape(X_pool, [-1,  8* 8 * 64])#同じく
-    X_fc1 = tf.nn.relu(tf.matmul(X_pool2_flat, W_fc1) + b_fc1)
+    X_fc1 = tf.nn.relu(tf.matmul(X_pool_flat, W_fc1) + b_fc1)
 
 
     # 出力層　　　　　　　　　
@@ -138,20 +139,18 @@ def SDE_model(X,t,W,task_name):
     y_conv = tf.matmul(X_fc1, W_fc2) + b_fc2
 
     return y_conv #メインではこれがnetという名前になる 
-    
-    
-    
 
 
-def ResFlow(inpt,t_now,delta_t,delta_w,task_name):
+
+def Res_flow(inpt,t_now,delta_t,delta_w,task_name):
     
     f_x = Res_func(inpt,task_name)
-    p_t = p(t)
+    p_t = p(t_now)
     
     if task_name == "Milstein_scheme":
-        return inpt+p_t*delta_t*f_x +np.pow(p_t*(1-p_t),0.5)*delta_w*f_x+()*(np.pow(delta_w,2)-delta_t)#ミルシュタインスキーム特有のやつ
+        return inpt+p_t*delta_t*f_x +np.power(p_t*(1-p_t),0.5)*delta_w*f_x+mil()*(np.pow(delta_w,2)-delta_t)#ミルシュタインスキーム特有のやつ
     else:
-        return inpt+p_t*delta_t*f_x +np.pow(p_t*(1-p_t),0.5)*delta_w*f_x
+        return inpt+p_t*delta_t*f_x +np.power(p_t*(1-p_t),0.5)*delta_w*f_x
    
 def Res_func(inpt,task_name):
     W_conv1 = variable([3, 3, 64, 64],"W_conv1")
