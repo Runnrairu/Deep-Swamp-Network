@@ -123,12 +123,12 @@ def SDE_model(X,t,W,task_name):
     
     
     # 最大値プーリング(平均値のほうがよくない？)
-    X_pool = tf.nn.max_pool(X_image, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME')
+    X_pool = tf.nn.max_pool(X_image, ksize=[1, 4, 4, 1],strides=[1, 4, 4, 1])
     
     # 全結合層
-    W_fc1 = weight_variable([7 * 7 * 64,4096],"w_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
+    W_fc1 = weight_variable([8* 8 * 64,4096],"w_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
     b_fc1 = bias_variable([4096],"b_fc1")
-    X_pool_flat = tf.reshape(X_pool, [-1, 7 * 7 * 64])#同じく
+    X_pool_flat = tf.reshape(X_pool, [-1,  8* 8 * 64])#同じく
     X_fc1 = tf.nn.relu(tf.matmul(X_pool2_flat, W_fc1) + b_fc1)
 
 
