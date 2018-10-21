@@ -1,10 +1,10 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 
 import _pickle as cPickle
 
 
-def load_data():
+def load():
     x_all = []
     y_all = []
     for i in range (5):
