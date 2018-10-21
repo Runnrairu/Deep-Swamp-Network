@@ -42,7 +42,7 @@ def run():
     opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
     train_op = opt.minimize(cross_entropy)
     sess = tf.Session()
-    sess.run(tf.initialize_all_variables())
+    sess.run(tf.global_variables_initializer())
     correct_prediction = tf.equal(tf.argmax(net, 1), tf.argmax(Y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
