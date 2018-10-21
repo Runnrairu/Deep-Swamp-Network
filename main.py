@@ -75,5 +75,7 @@ def run():
             print acc
 
     sess.close()
-    
-    
+ 
+if __name__ == '__main__':
+    run()
+   
