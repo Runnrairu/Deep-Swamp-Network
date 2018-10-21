@@ -35,11 +35,12 @@ def run():
     time_list = tf.placeholder("float", [None])
     W_list = tf.placeholder("float", [None])
     learning_rate = tf.placeholder("float", [])
-    task_name = tf.placeholder("string")
+    task_name_tr = tf.placeholder("string")
     
     net = RF.SDE_model(X,time_list,W_list,task_name)
     cross_entropy = -tf.reduce_sum(Y*tf.log(net))
-    opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
+    #opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
+    opt=tf.train.GradientDescentOptimizer(learning_rate)
     train_op = opt.minimize(cross_entropy)
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
@@ -50,23 +51,25 @@ def run():
     batch_size = args.batch_size
     
     for j in range (1):
+        
         for i in range (0, 500, batch_size):
+            print(i)
             t,W = RF.tW_def(depth,task_name)
-            feed_dict={
+            feed_dict_train={
                 X: X_train[i:i + batch_size], 
                 Y: Y_train[i:i + batch_size],
                 learning_rate: args.learning_rate,
                 time_list:t,
                 W_list:W,
-                task_name:task_name}
-            sess.run([train_op], feed_dict=feed_dict)
+                task_name_tr:task_name}
+            sess.run([train_op], feed_dict=feed_dict_train)
             if i % 512 == 0:
                 
                 saver.save(sess, 'progress', global_step=i)
-
+    print("test")
     for i in range (0, 10000, batch_size):
         if i + batch_size < 10000:
-            t,W = RF.tW_def(10,task_name)
+            t,W = RF.tW_def(depth,task_name)
             acc = sess.run([accuracy],feed_dict={
                 X: X_test[i:i+batch_size],
                 Y: Y_test[i:i+batch_size],
