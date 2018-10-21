@@ -100,17 +100,17 @@ def conv2d(x, W):
 def variable(shape,var_name):
     with tf.variable_scope('scope',reuse=tf.AUTO_REUSE):
         initial = tf.truncated_normal_initializer(shape, stddev=0.1)
-        var = tf.get_variable(name=var_name,shape,initializer = initial)
+        var = tf.get_variable(name=var_name,shape=shape,initializer = initial)
     return var
 
 
 
 def SDE_model(X,t,W,task_name):
     
-    depth = len(t) 
+    depth = t.get_shape
     
-    W_conv = weight_variable([5, 5, 3, 64],"W_conv")
-    b_conv = bias_variable([64],"b_conv")
+    W_conv = variable([5, 5, 3, 64],"W_conv")
+    b_conv = variable([64],"b_conv")
     X_image = tf.reshape(X, [-1,32,32,3])
     
     X_image = conv2d(x, W_conv, strides=[1, 1, 1, 1], padding='SAME')
@@ -126,15 +126,15 @@ def SDE_model(X,t,W,task_name):
     X_pool = tf.nn.max_pool(X_image, ksize=[1, 4, 4, 1],strides=[1, 4, 4, 1])
     
     # 全結合層
-    W_fc1 = weight_variable([8* 8 * 64,4096],"w_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
-    b_fc1 = bias_variable([4096],"b_fc1")
+    W_fc1 = variable([8* 8 * 64,4096],"w_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
+    b_fc1 = variable([4096],"b_fc1")
     X_pool_flat = tf.reshape(X_pool, [-1,  8* 8 * 64])#同じく
     X_fc1 = tf.nn.relu(tf.matmul(X_pool2_flat, W_fc1) + b_fc1)
 
 
     # 出力層　　　　　　　　　
-    W_fc2 = weight_variable([4096, 10],"W_fc2")
-    b_fc2 = bias_variable([10],"b_fc2")
+    W_fc2 = variable([4096, 10],"W_fc2")
+    b_fc2 = variable([10],"b_fc2")
     y_conv = tf.matmul(X_fc1, W_fc2) + b_fc2
 
     return y_conv #メインではこれがnetという名前になる 
