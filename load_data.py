@@ -39,11 +39,11 @@ def load():
 
     test_data_dic = unpickle("cifar-10-batches-py/test_batch")
     X_test = test_data_dic['data']
-    X_test = X_test.reshape(len(X_test),3,32,32)
+    X_test = X_test.reshape(len(X_test),32,32,3)
     y_test = np.array(test_data_dic['labels'])
-    X_train = X_train.reshape((len(X_train),3, 32, 32))
+    X_train = X_train.reshape((len(X_train),32, 32,3))
     y_train = np.array(y_train)
+    print(y_train.dtype)
     return X_train, y_train, X_test, y_test
 
 
- 
