@@ -2,8 +2,9 @@ import load_data
 import tensorflow as tf
 import numpy as np
 import ResFlow as RF
-
-BATCH_SIZE = 64
+import argparse
+import os
+BATCH_SIZE = 20
 LEARNING_RATE = 1e-4
 DATASET_DIRECTORY = "datasets"
 MODEL_DIRECTORY = "model"
@@ -14,6 +15,7 @@ task_name="Fukasawa_scheme"
 # task_name = "Milstein_scheme"
 # task_name = "ODEnet"
 
+depth=52
 
 def run():
     parser = argparse.ArgumentParser()
@@ -22,19 +24,20 @@ def run():
     parser.add_argument('-bs', '--batch_size', type=int, default=BATCH_SIZE)
     parser.add_argument('-lr', '--learning_rate', type=float, default=LEARNING_RATE)
     parser.add_argument('-g', '--gpu', type=int, default=GPU)
+    
     args = parser.parse_args()
-    directory_output = os.path.join(args.model_directory, args.experiment_id)
+    directory_output = os.path.join(args.model_directory)
     
     X_train, Y_train, X_test, Y_test = load_data.load()
     
-    X = tf.placeholder("float", [batch_size, 32, 32, 3])
-    Y = tf.placeholder("float", [batch_size, 10])
-    t = tf.placeholder("float", [None])
-    W = tf.placeholder("float", [None])
+    X = tf.placeholder("float", [None, 32, 32, 3])
+    Y = tf.placeholder("float", [None, 10])
+    time_list = tf.placeholder("float", [None])
+    W_list = tf.placeholder("float", [None])
     learning_rate = tf.placeholder("float", [])
     task_name = tf.placeholder("string")
     
-    net = RF.SDE_model(X,t,W,task_name)
+    net = RF.SDE_model(X,time_list,W_list,task_name)
     cross_entropy = -tf.reduce_sum(Y*tf.log(net))
     opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
     train_op = opt.minimize(cross_entropy)
@@ -46,9 +49,9 @@ def run():
     saver = tf.train.Saver()
     batch_size = args.batch_size
     
-    for j in range (10):
-        for i in range (0, 50000, batch_size):
-            t,W = RF.tW_def(10,task_name)
+    for j in range (1):
+        for i in range (0, 500, batch_size):
+            t,W = RF.tW_def(depth,task_name)
             feed_dict={
                 X: X_train[i:i + batch_size], 
                 Y: Y_train[i:i + batch_size],
@@ -58,7 +61,7 @@ def run():
                 task_name:task_name}
             sess.run([train_op], feed_dict=feed_dict)
             if i % 512 == 0:
-                print "training on image #%d" % i
+                
                 saver.save(sess, 'progress', global_step=i)
 
     for i in range (0, 10000, batch_size):
@@ -72,7 +75,7 @@ def run():
                 task_name:task_name,
                 })
             accuracy_summary = tf.scalar_summary("accuracy", accuracy)
-            print acc
+            print(acc)
 
     sess.close()
  
