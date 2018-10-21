@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 import tensorflow as tf
 import numpy as np
@@ -14,10 +13,14 @@ def G(t):#Fukasawa_schemeで使用
     return 1.0
 
 def G_nm(n,t_now):
-    return float(1)/(G(t)*n)
+    return float(1)/(G(t_now)*n)
+
+
 
 
 def tW_def(n,task_name):
+    t=[]
+    W=[]
     if task_name == "Fukasawa_scheme":
         t,W = Fukasawa_scheme(n,T)
     elif task_name == "Simplicity_scheme":
@@ -33,38 +36,46 @@ def tW_def(n,task_name):
 
 
 
-
 def Fukasawa_scheme(n,T):#今回最も特殊なスキーム
     
-    t = [0]*(n)
-    W=[0]*(n)
+    t = [0]*(n+1)
+    W=[0]*(n+1)
     t_now=0
     m=0
     a= pow(1+2.0/d,1+d/2.0)
     
-    while(t_now < (T-G_nm(n,t_now))):
-        N = np.random.normal()
-        E = np.random.exponential()
+    while(t_now < (T-a*G_nm(n,t_now)) and m<n):
+        
+        N = np.random.normal(0,1)
+        E = np.random.exponential(1.0)
         ab_N = np.absolute(N)
         Z = ab_N*ab_N+2*E/d
-        G__nm = G_nm(t_now)
-        delta_t = G__nm*np.exp(-Z)
-        t[n]= delta_t
-        t_now +=delta_t
-        W[n] = pow(G__nm*a*d*Z*np.exp(-Z),0.5)*N/ab_N
+        G__nm = G_nm(n,t_now)
+        delta_t = G__nm*a*np.exp(-Z)
+        t[m]= delta_t
+        t_now += delta_t
+        #if t_now>T:
+            
+        #    t_now -= delta_t
+            
+        #    break
+        W[m] = np.power(G__nm*a*d*Z*np.exp(-Z),0.5)*N/ab_N
         m+=1
-    if m<n:
-        delta_euler_t = (T-t_now)/(n-m) 
-        sigma_euler_t = pow(delta_euler_t,0.5)
-        for i in range(n-m):
-            t[m+i] = delta_euler_t
-            W[m+i] = np.random.normal(0,sigma_euler_t) 
+    
+    delta_euler_t = (T-t_now)/(n-m+1) 
+    sigma_euler_t = np.power(delta_euler_t,0.5)
+    for i in range(n-m+1):
+        
+        t[m+i] = delta_euler_t
+        W[m+i] = np.random.normal(0,sigma_euler_t) 
+            
+    
     return t,W
 
 def ODEnet(n,T):#先行研究
-    delta_t = float(T)/n
-    t = [delta_t]*(n)
-    W = [0]*(n)
+    delta_t = float(T)/(n+1)
+    t = [delta_t]*(n+1)
+    W = [0]*(n+1)
     return t,W
 
 
@@ -72,10 +83,10 @@ def ODEnet(n,T):#先行研究
 
 
 def Simplicity_scheme(n,T):
-    delta_t = float(T)/n
-    t = [delta_t]*(n)
+    delta_t = float(T)/(n+1)
+    t = [delta_t]*(n+1)
     sigma = pow(delta_t,0.5)
-    W = np.random.choice([-sigma,sigma], n, replace=True)
+    W = np.random.choice([-sigma,sigma], n+1, replace=True)
     
     
     return t,W
@@ -83,10 +94,10 @@ def Simplicity_scheme(n,T):
 
 
 def Euler_Maruyama_scheme(n,T):
-    delta_t = float(T)/n
-    t = [delta_t]*(n)
-    sigma = pow(delta_t,0.5)
-    W = np.random.normal(0,sigma,n)
+    delta_t = float(T)/(n+1)
+    t = [delta_t]*(n+1)
+    sigma = np.power(delta_t,0.5)
+    W = np.random.normal(0,sigma,n+1)
     return t,W
 
     
@@ -100,13 +111,14 @@ def conv2d(x, W):
 
 def variable(shape,var_name):
     with tf.variable_scope('scope',reuse=tf.AUTO_REUSE):
+        
         initial = tf.truncated_normal_initializer( stddev=0.1)
         var = tf.get_variable(name=var_name,shape=shape,initializer = initial)
     return var
 
 
 
-def SDE_model(X,t,W,task_name):
+def SDE_model(X,t,W,task_name_tr):
     
     depth =52
     
@@ -119,40 +131,39 @@ def SDE_model(X,t,W,task_name):
     for i in range(depth):
         delta_t = t[i]
         delta_W = W[i]
-        X_image = Res_flow(X_image,t_now,delta_t,delta_W,task_name)
+        X_image = Res_flow(X_image,t_now,delta_t,delta_W,task_name_tr)
         t_now += delta_t
     
     
     # 最大値プーリング(平均値のほうがよくない？)
     X_pool = tf.nn.max_pool(X_image, ksize=[1, 4, 4, 1],strides=[1, 4, 4, 1],padding = "VALID")
-    
+    print("pool")
     # 全結合層
     W_fc1 = variable([8* 8 * 64,4096],"w_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
     b_fc1 = variable([4096],"b_fc1")
     X_pool_flat = tf.reshape(X_pool, [-1,  8* 8 * 64])#同じく
     X_fc1 = tf.nn.relu(tf.matmul(X_pool_flat, W_fc1) + b_fc1)
-
-
+    
     # 出力層　　　　　　　　　
     W_fc2 = variable([4096, 10],"W_fc2")
     b_fc2 = variable([10],"b_fc2")
     y_conv = tf.matmul(X_fc1, W_fc2) + b_fc2
-
+    print(y_conv.get_shape)
     return y_conv #メインではこれがnetという名前になる 
 
 
 
-def Res_flow(inpt,t_now,delta_t,delta_w,task_name):
+def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr):
     
-    f_x = Res_func(inpt,task_name)
+    f_x = Res_func(inpt)
     p_t = p(t_now)
     
-    if task_name == "Milstein_scheme":
+    if task_name_tr == "Milstein_scheme":
         return inpt+p_t*delta_t*f_x +np.power(p_t*(1-p_t),0.5)*delta_w*f_x+mil()*(np.pow(delta_w,2)-delta_t)#ミルシュタインスキーム特有のやつ
     else:
         return inpt+p_t*delta_t*f_x +np.power(p_t*(1-p_t),0.5)*delta_w*f_x
    
-def Res_func(inpt,task_name):
+def Res_func(inpt):
     W_conv1 = variable([3, 3, 64, 64],"W_conv1")
     b_conv1 = variable([64],"b_conv1")
     W_conv2 = variable([3, 3, 64, 64],"W_conv2")
