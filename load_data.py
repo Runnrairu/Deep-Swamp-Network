@@ -1,40 +1,48 @@
 # -*- coding: utf-8 -*-
 
 
-import _pickle as cPickle
 
+#def unpickle(file):
+#    fo = open(file, 'rb')
+#    dict = cPickle.load(fo)
+#    fo.close()
+#    return dict
+
+#def load():
+
+
+import sys
+import pickle
+import numpy as np
+
+def unpickle(file):
+    fp = open(file, 'rb')
+    if sys.version_info.major == 2:
+        data = pickle.load(fp)
+    elif sys.version_info.major == 3:
+        data = pickle.load(fp, encoding='latin-1')
+    fp.close()
+
+    return data
 
 def load():
-    x_all = []
-    y_all = []
-    for i in range (5):
-        d = unpickle("cifar-10-batches-py/data_batch_" + str(i+1))
-        x_ = d['data']
-        y_ = d['labels']
-        x_all.append(x_)
-        y_all.append(y_)
+    X_train = None
+    y_train = []
 
-    d = unpickle('cifar-10-batches-py/test_batch')
-    x_all.append(d['data'])
-    y_all.append(d['labels'])
+    for i in range(1,6):
+        data_dic = unpickle("cifar-10-batches-py/data_batch_{}".format(i))
+        if i == 1:
+            X_train = data_dic['data']
+        else:
+            X_train = np.vstack((X_train, data_dic['data']))
+        y_train += data_dic['labels']
 
-    x = np.concatenate(x_all) / np.float32(255)
-    y = np.concatenate(y_all)
-    x = np.dstack((x[:, :1024], x[:, 1024:2048], x[:, 2048:]))
-    x = x.reshape((x.shape[0], 32, 32, 3))
-    
-    pixel_mean = np.mean(x[0:50000],axis=0)
-    x -= pixel_mean
-
-    y = map(one_hot_vec, y)
-    X_train = x[0:50000,:,:,:]
-    Y_train = y[0:50000]
-    X_test = x[50000:,:,:,:]
-    Y_test = y[50000:]
-
-    return (X_train, Y_train, X_test, Y_test)
-
-
-
+    test_data_dic = unpickle("cifar-10-batches-py/test_batch")
+    X_test = test_data_dic['data']
+    X_test = X_test.reshape(len(X_test),3,32,32)
+    y_test = np.array(test_data_dic['labels'])
+    X_train = X_train.reshape((len(X_train),3, 32, 32))
+    y_train = np.array(y_train)
+    return X_train, y_train, X_test, y_test
 
 
