@@ -4,6 +4,9 @@ import numpy as np
 import ResFlow as RF
 import argparse
 import os
+
+
+
 BATCH_SIZE = 20
 LEARNING_RATE = 1e-4
 DATASET_DIRECTORY = "datasets"
@@ -30,6 +33,8 @@ def run():
     
     X_train, Y_train, X_test, Y_test = load_data.load()
     
+    Y_train = np.reshape( Y_train , (-1,10) )
+    Y_test = np.reshape( Y_test , (-1,10) )
     X = tf.placeholder("float", [None, 32, 32, 3])
     Y = tf.placeholder("float", [None, 10])
     time_list = tf.placeholder("float", [None])
@@ -52,8 +57,8 @@ def run():
     
     for j in range (1):
         
-        for i in range (0, 500, batch_size):
-            print(i)
+        for i in range (0, 40, batch_size):
+            
             t,W = RF.tW_def(depth,task_name)
             feed_dict_train={
                 X: X_train[i:i + batch_size], 
@@ -64,9 +69,8 @@ def run():
                 task_name_tr:task_name}
             sess.run([train_op], feed_dict=feed_dict_train)
             if i % 512 == 0:
-                
-                saver.save(sess, 'progress', global_step=i)
-    print("test")
+                a=1
+    
     for i in range (0, 10000, batch_size):
         if i + batch_size < 10000:
             t,W = RF.tW_def(depth,task_name)
@@ -75,9 +79,9 @@ def run():
                 Y: Y_test[i:i+batch_size],
                 time_list:t,
                 W_list:W,
-                task_name:task_name,
+                task_name_tr:task_name,
                 })
-            accuracy_summary = tf.scalar_summary("accuracy", accuracy)
+           # accuracy_summary = tf.scalar_summary("accuracy", accuracy)
             print(acc)
 
     sess.close()
