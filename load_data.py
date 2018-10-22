@@ -43,7 +43,8 @@ def load():
     y_test = np.array(test_data_dic['labels'])
     X_train = X_train.reshape((len(X_train),32, 32,3))
     y_train = np.array(y_train)
-    print(y_train.dtype)
+    
     return X_train, y_train, X_test, y_test
+
 
 
