@@ -137,7 +137,7 @@ def SDE_model(X,t,W,task_name_tr):
     
     # 最大値プーリング(平均値のほうがよくない？)
     X_pool = tf.nn.max_pool(X_image, ksize=[1, 4, 4, 1],strides=[1, 4, 4, 1],padding = "VALID")
-    print("pool")
+    
     # 全結合層
     W_fc1 = variable([8* 8 * 64,4096],"w_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
     b_fc1 = variable([4096],"b_fc1")
@@ -148,7 +148,7 @@ def SDE_model(X,t,W,task_name_tr):
     W_fc2 = variable([4096, 10],"W_fc2")
     b_fc2 = variable([10],"b_fc2")
     y_conv = tf.matmul(X_fc1, W_fc2) + b_fc2
-    print(y_conv.get_shape)
+    
     return y_conv #メインではこれがnetという名前になる 
 
 
