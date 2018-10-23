@@ -55,7 +55,7 @@ def run():
     batch_size = args.batch_size
     num_data = X_train.shape[0]
     
-    for j in range (1):
+    for j in range (300):
         sff_idx = np.random.permutation(num_data)
         for idx in range(0, num_data, batch_size):
             print(idx)
