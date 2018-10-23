@@ -7,7 +7,7 @@ import os
 
 
 
-BATCH_SIZE = 20
+BATCH_SIZE = 64
 LEARNING_RATE = 1e-4
 DATASET_DIRECTORY = "datasets"
 MODEL_DIRECTORY = "model"
@@ -33,8 +33,7 @@ def run():
     
     X_train, Y_train, X_test, Y_test = load_data.load()
     
-    Y_train = np.reshape( Y_train , (-1,10) )
-    Y_test = np.reshape( Y_test , (-1,10) )
+    
     X = tf.placeholder("float", [None, 32, 32, 3])
     Y = tf.placeholder("float", [None, 10])
     time_list = tf.placeholder("float", [None])
@@ -55,9 +54,11 @@ def run():
     saver = tf.train.Saver()
     batch_size = args.batch_size
     num_data = X_train.shape[0]
+    
     for j in range (1):
         sff_idx = np.random.permutation(num_data)
         for idx in range(0, num_data, batch_size):
+            print(idx)
             batch_x = X_train[sff_idx[idx: idx + batch_size 
             if idx + batch_size < num_data else num_data]]
             batch_y = Y_train[sff_idx[idx: idx + batch_size
@@ -71,8 +72,8 @@ def run():
                 W_list:W,
                 task_name_tr:task_name}
             sess.run([train_op], feed_dict=feed_dict_train)
-            if i % 512 == 0:
-                a=1
+            #if j % 512 == 0:
+            #    a=1
     
     
       
