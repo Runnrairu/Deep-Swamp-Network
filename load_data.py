@@ -35,14 +35,14 @@ def load():
     y_train = []
 
     for i in range(1,6):
-        data_dic = unpickle("cifar-10-batches-py/data_batch_{}".format(i))
+        data_dic = unpickle("datasets/cifar-10-batches-py/data_batch_{}".format(i))
         if i == 1:
             X_train = data_dic['data']
         else:
             X_train = np.vstack((X_train, data_dic['data']))
         y_train += data_dic['labels']
     
-    test_data_dic = unpickle("cifar-10-batches-py/test_batch")
+    test_data_dic = unpickle("datasets/cifar-10-batches-py/test_batch")
     X_test = test_data_dic['data']
     X_test = X_test.reshape(len(X_test),3,32,32).transpose(0,2,3,1)
     y_test = np.array(test_data_dic['labels'])
