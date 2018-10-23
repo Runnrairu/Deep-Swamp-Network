@@ -54,15 +54,18 @@ def run():
 
     saver = tf.train.Saver()
     batch_size = args.batch_size
-    
+    num_data = X_train.shape[0]
     for j in range (1):
-        
-        for i in range (0, 40, batch_size):
-            
+        sff_idx = np.random.permutation(num_data)
+        for idx in range(0, num_data, batch_size):
+            batch_x = X_train[sff_idx[idx: idx + batch_size 
+            if idx + batch_size < num_data else num_data]]
+            batch_y = Y_train[sff_idx[idx: idx + batch_size
+            if idx + batch_size < num_data else num_data]]
             t,W = RF.tW_def(depth,task_name)
             feed_dict_train={
-                X: X_train[i:i + batch_size], 
-                Y: Y_train[i:i + batch_size],
+                X: batch_x, 
+                Y: batch_y,
                 learning_rate: args.learning_rate,
                 time_list:t,
                 W_list:W,
@@ -71,18 +74,18 @@ def run():
             if i % 512 == 0:
                 a=1
     
-    for i in range (0, 10000, batch_size):
-        if i + batch_size < 10000:
-            t,W = RF.tW_def(depth,task_name)
-            acc = sess.run([accuracy],feed_dict={
-                X: X_test[i:i+batch_size],
-                Y: Y_test[i:i+batch_size],
+    
+      
+    t,W = RF.tW_def(depth,task_name)
+    acc = sess.run([accuracy],feed_dict={
+                X: X_test,
+                Y: Y_test,
                 time_list:t,
                 W_list:W,
                 task_name_tr:task_name,
                 })
            # accuracy_summary = tf.scalar_summary("accuracy", accuracy)
-            print(acc)
+    print(acc)
 
     sess.close()
  
