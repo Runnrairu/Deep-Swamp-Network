@@ -27,7 +27,7 @@ def tW_def(n,task_name):
         t,W = Simplicity_scheme(n,T)
     elif task_name == "Euler_Maruyama_scheme" or task_name == "Milstein_scheme":
         t,W = Euler_Maruyama_scheme(n,T)
-    elif task_name == "ODEnet":
+    elif task_name == "ODEnet" or task_name=="test" :
         t,W = ODEnet(n,T)
     else:
         print("Invarid!")
@@ -42,7 +42,7 @@ def Fukasawa_scheme(n,T):#今回最も特殊なスキーム
     W=[0]*(n+1)
     t_now=0
     m=0
-    a= pow(1+2.0/d,1+d/2.0)
+    a= np.power(1+2.0/d,1+d/2.0)
     
     while(t_now < (T-a*G_nm(n,t_now)) and m<n):
         
@@ -85,7 +85,7 @@ def ODEnet(n,T):#先行研究
 def Simplicity_scheme(n,T):
     delta_t = float(T)/(n+1)
     t = [delta_t]*(n+1)
-    sigma = pow(delta_t,0.5)
+    sigma = np.power(delta_t,0.5)
     W = np.random.choice([-sigma,sigma], n+1, replace=True)
     
     
@@ -136,12 +136,12 @@ def SDE_model(X,t,W,task_name_tr):
     
     
     # 最大値プーリング(平均値のほうがよくない？)
-    X_pool = tf.nn.max_pool(X_image, ksize=[1, 4, 4, 1],strides=[1, 4, 4, 1],padding = "VALID")
+    X_pool = tf.nn.max_pool(X_image, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1],padding = "VALID")
     
     # 全結合層
-    W_fc1 = variable([8* 8 * 64,4096],"w_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
+    W_fc1 = variable([16* 16 * 64,4096],"w_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
     b_fc1 = variable([4096],"b_fc1")
-    X_pool_flat = tf.reshape(X_pool, [-1,  8* 8 * 64])#同じく
+    X_pool_flat = tf.reshape(X_pool, [-1,  16* 16 * 64])#同じく
     X_fc1 = tf.nn.relu(tf.matmul(X_pool_flat, W_fc1) + b_fc1)
     
     # 出力層　　　　　　　　　
@@ -160,6 +160,8 @@ def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr):
     
     if task_name_tr == "Milstein_scheme":
         return inpt+p_t*delta_t*f_x +np.power(p_t*(1-p_t),0.5)*delta_w*f_x+mil()*(np.pow(delta_w,2)-delta_t)#ミルシュタインスキーム特有のやつ
+    elif task_name_tr =="ODEnet" or task_name_tr=="test":
+        return inpt+delta_t*f_x
     else:
         return inpt+p_t*delta_t*f_x +np.power(p_t*(1-p_t),0.5)*delta_w*f_x
    
@@ -171,7 +173,7 @@ def Res_func(inpt):
     
     
     inpt_ = tf.nn.relu(conv2d(inpt, W_conv1)+b_conv1)#バッチ正規化したい
-    output = conv2d(inpt, W_conv2)+b_conv2 #ここReluかますかは迷いどころ
+    output = conv2d(inpt_, W_conv2)+b_conv2 
     
     
     
