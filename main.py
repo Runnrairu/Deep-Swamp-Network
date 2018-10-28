@@ -58,7 +58,7 @@ def run():
     for j in range (300):
         sff_idx = np.random.permutation(num_data)
         for idx in range(0, num_data, batch_size):
-            print(idx)
+            
             batch_x = X_train[sff_idx[idx: idx + batch_size 
             if idx + batch_size < num_data else num_data]]
             batch_y = Y_train[sff_idx[idx: idx + batch_size
@@ -74,11 +74,20 @@ def run():
             sess.run([train_op], feed_dict=feed_dict_train)
             #if j % 512 == 0:
             #    a=1
-    
-    
+        t,W = RF.tW_def(depth,"test")
+        feed_dict_test={
+                X: X_test, 
+                Y: T_test,
+                time_list:t_test,
+                W_list:W_test,
+                task_name_tr:"test"
+        print(sess.run(accuracy,feed_dict=feed_dict_test))
+            
+            
+            
       
     t,W = RF.tW_def(depth,"test")
-    acc = sess.run([accuracy],feed_dict={
+    acc = sess.run(accuracy,feed_dict={
                 X: X_test,
                 Y: Y_test,
                 time_list:t,
