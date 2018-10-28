@@ -80,7 +80,7 @@ def run():
                 Y: T_test,
                 time_list:t_test,
                 W_list:W_test,
-                task_name_tr:"test"
+                task_name_tr:"test"}
         print(sess.run(accuracy,feed_dict=feed_dict_test))
             
             
