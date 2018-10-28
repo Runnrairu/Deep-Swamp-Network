@@ -77,7 +77,7 @@ def run():
     
     
       
-    t,W = RF.tW_def(depth,task_name)
+    t,W = RF.tW_def(depth,"test")
     acc = sess.run([accuracy],feed_dict={
                 X: X_test,
                 Y: Y_test,
