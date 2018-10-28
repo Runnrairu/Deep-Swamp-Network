@@ -83,7 +83,7 @@ def run():
                 Y: Y_test,
                 time_list:t,
                 W_list:W,
-                task_name_tr:task_name,
+                task_name_tr:"test",
                 })
            # accuracy_summary = tf.scalar_summary("accuracy", accuracy)
     print(acc)
