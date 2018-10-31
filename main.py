@@ -74,15 +74,15 @@ def run():
             sess.run([train_op], feed_dict=feed_dict_train)
             #if j % 512 == 0:
             #    a=1
-        if j % 10==0:
-            t_test,W_test = RF.tW_def(depth,"test")
-            feed_dict_test={
-                    X: X_test, 
-                    Y: Y_test,
-                    time_list:t_test,
-                    W_list:W_test,
-                    task_name_tr:"test"}
-            print(sess.run(accuracy,feed_dict=feed_dict_test))
+       # if j % 10==0:
+            #t_test,W_test = RF.tW_def(depth,"test")
+           # feed_dict_test={
+                #    X: X_test, 
+                #    Y: Y_test,
+                #    time_list:t_test,
+                #    W_list:W_test,
+                #    task_name_tr:"test"}
+            #print(sess.run(accuracy,feed_dict=feed_dict_test))
             
             
             
