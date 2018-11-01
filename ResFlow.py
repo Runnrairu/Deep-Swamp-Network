@@ -5,8 +5,11 @@ import numpy as np
 T = 1.0
 
 d=32*32*64
+
+
+
 def p(t):
-    p_T = 0.4
+    p_T = 0.5
     return 1-t/T*(1-p_T)
 
 def G(t):#Fukasawa_schemeで使用
@@ -68,7 +71,8 @@ def Fukasawa_scheme(n,T):#今回最も特殊なスキーム
         
         t[m+i] = delta_euler_t
         W[m+i] = np.random.normal(0,sigma_euler_t) 
-            
+    print(t)
+    print(W)    
     
     return t,W
 
@@ -116,10 +120,11 @@ def variable(shape,var_name):
         var = tf.get_variable(name=var_name,shape=shape,initializer = initial)
     return var
 
-
+Z_imagetest = []
 
 def SDE_model(X,t,W,task_name_tr):
-    
+    global Z_imagetest
+    Z_imagetest=[]
     depth =52
     
     W_conv = variable([5, 5, 3, 64],"W_conv")
@@ -131,8 +136,12 @@ def SDE_model(X,t,W,task_name_tr):
     for i in range(depth):
         delta_t = t[i]
         delta_W = W[i]
-        X_image = Res_flow(X_image,t_now,delta_t,delta_W,task_name_tr)
         t_now += delta_t
+        X_image = Res_flow(X_image,t_now,delta_t,delta_W,task_name_tr)
+        
+        Z_imagetest.append(X_image) 
+          
+        
     
     
     # 最大値プーリング(平均値のほうがよくない？)
@@ -159,11 +168,11 @@ def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr):
     p_t = p(t_now)
     
     if task_name_tr == "Milstein_scheme":
-        return inpt+p_t*delta_t*f_x +np.power(p_t*(1-p_t),0.5)*delta_w*f_x+mil()*(np.pow(delta_w,2)-delta_t)#ミルシュタインスキーム特有のやつ
+        return inpt+p_t*delta_t*f_x +tf.pow(p_t*(1-p_t),0.5)*delta_w*f_x+mil()*(np.pow(delta_w,2)-delta_t)#ミルシュタインスキーム特有のやつ
     elif task_name_tr =="ODEnet" or task_name_tr=="test":
         return inpt+delta_t*f_x
     else:
-        return inpt+p_t*delta_t*f_x +np.power(p_t*(1-p_t),0.5)*delta_w*f_x
+        return inpt+p_t*delta_t*f_x +tf.pow(p_t*(1-p_t),0.5)*delta_w*f_x
    
 def Res_func(inpt):
     W_conv1 = variable([3, 3, 64, 64],"W_conv1")
