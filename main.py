@@ -4,6 +4,7 @@ import numpy as np
 import ResFlow as RF
 import argparse
 import os
+import datetime
 
 
 
@@ -42,7 +43,7 @@ def run():
     task_name_tr = tf.placeholder("string")
     
     net = RF.SDE_model(X,time_list,W_list,task_name)
-    cross_entropy = -tf.reduce_sum(Y*tf.log(net))
+    cross_entropy = -tf.reduce_sum(Y*tf.log(tf.clip_by_value(net,1e-10,1.0)))
     #opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
     opt=tf.train.GradientDescentOptimizer(learning_rate)
     train_op = opt.minimize(cross_entropy)
@@ -55,7 +56,7 @@ def run():
     batch_size = args.batch_size
     num_data = X_train.shape[0]
     
-    for j in range (300):
+    for j in range (30):
         sff_idx = np.random.permutation(num_data)
         for idx in range(0, num_data, batch_size):
             
@@ -72,18 +73,20 @@ def run():
                 W_list:W,
                 task_name_tr:task_name}
             sess.run([train_op], feed_dict=feed_dict_train)
+            print(sess.run(cross_entropy,feed_dict=feed_dict_train))
             #if j % 512 == 0:
             #    a=1
-       # if j % 10==0:
-            #t_test,W_test = RF.tW_def(depth,"test")
-           # feed_dict_test={
-                #    X: X_test, 
-                #    Y: Y_test,
-                #    time_list:t_test,
-                #    W_list:W_test,
-                #    task_name_tr:"test"}
-            #print(sess.run(accuracy,feed_dict=feed_dict_test))
-            
+        if j % 10 ==0 :
+            t_test,W_test = RF.tW_def(depth,"test")
+            feed_dict_test={
+                X: X_test[0:1000], 
+                Y: Y_test[0:1000],
+                time_list:t_test,
+                W_list:W_test,
+                task_name_tr:"test"}
+            saver.save(sess,"model/model.ckpt"+"step"+str(j)+datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
+            print(sess.run(accuracy,feed_dict=feed_dict_test))
+           
             
             
       
