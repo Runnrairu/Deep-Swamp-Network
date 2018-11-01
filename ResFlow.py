@@ -17,7 +17,7 @@ def G(t):#Fukasawa_schemeで使用
     return 1.0
 
 def G_nm(n,t_now):
-    return T/(G(t_now)*n)
+    return 1.0/(G(t_now)*n)
 
 
 
@@ -44,6 +44,8 @@ def Fukasawa_scheme(n,T):#今回最も特殊なスキーム
     
     t = [0]*(n+1)
     W=[0]*(n+1)
+    N_list=np.random.normal(0,1.0,[n+1])
+    E_list=np.random.exponential(1.0,[n+1])
     t_now=0
     m=0
     d=1
@@ -51,8 +53,8 @@ def Fukasawa_scheme(n,T):#今回最も特殊なスキーム
     
     while(t_now < (T-a*G_nm(n,t_now)) and m<n):
         
-        N = np.random.normal(0,1)
-        E = np.random.exponential(1.0)
+        N = N_list[m]
+        E = E_list[m]
         ab_N = np.absolute(N)
         Z = (ab_N*ab_N+2*E)/d
         G__nm = G_nm(n,t_now)
@@ -69,10 +71,9 @@ def Fukasawa_scheme(n,T):#今回最も特殊なスキーム
     
     delta_euler_t = (T-t_now)/(n-m+1) 
     sigma_euler_t = np.power(delta_euler_t,0.5)
-    for i in range(n-m+1):
-        
+    for i in range(n-m+1):        
         t[m+i] = delta_euler_t
-        W[m+i] = np.random.normal(0,sigma_euler_t)    
+        W[m+i] = sigma_euler_t*N_list[m+i]   
     
     return t,W
 
