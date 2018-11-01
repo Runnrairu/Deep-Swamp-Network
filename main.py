@@ -9,7 +9,7 @@ import datetime
 
 
 BATCH_SIZE = 64
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-3
 DATASET_DIRECTORY = "datasets"
 MODEL_DIRECTORY = "model"
 GPU = 0
@@ -42,7 +42,7 @@ def run():
     learning_rate = tf.placeholder("float", [])
     task_name_tr = tf.placeholder("string")
     
-    net = RF.SDE_model(X,time_list,W_list,task_name,)
+    net = RF.SDE_model(X,time_list,W_list,task_name)
     cross_entropy = -tf.reduce_sum(Y*tf.log(tf.clip_by_value(net,1e-10,1.0)))
     #opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
     opt=tf.train.GradientDescentOptimizer(learning_rate)
@@ -75,10 +75,10 @@ def run():
             
             sess.run([train_op], feed_dict=feed_dict_train)
             count = 0
-            for z in (RF.Z_imagetest):
-                print(count)
-                assert(not np.isnan(sess.run(z,feed_dict=feed_dict_train)).any())
-                count += 1
+            #for z in (RF.Z_imagetest):
+            #print(sess.run(net,feed_dict= feed_dict_train))
+                #assert(not np.isnan(sess.run(z,feed_dict=feed_dict_train)).any())
+                #count += 1
             print(sess.run(cross_entropy,feed_dict=feed_dict_train))
             #if j % 512 == 0:
             #    a=1
