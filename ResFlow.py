@@ -10,13 +10,14 @@ d=32*32*64
 
 def p(t):
     p_T = 0.5
+    
     return 1-t/T*(1-p_T)
 
 def G(t):#Fukasawa_schemeで使用
     return 1.0
 
 def G_nm(n,t_now):
-    return float(1)/(G(t_now)*n)
+    return T/(G(t_now)*n)
 
 
 
@@ -45,6 +46,7 @@ def Fukasawa_scheme(n,T):#今回最も特殊なスキーム
     W=[0]*(n+1)
     t_now=0
     m=0
+    d=1
     a= np.power(1+2.0/d,1+d/2.0)
     
     while(t_now < (T-a*G_nm(n,t_now)) and m<n):
@@ -52,7 +54,7 @@ def Fukasawa_scheme(n,T):#今回最も特殊なスキーム
         N = np.random.normal(0,1)
         E = np.random.exponential(1.0)
         ab_N = np.absolute(N)
-        Z = ab_N*ab_N+2*E/d
+        Z = (ab_N*ab_N+2*E)/d
         G__nm = G_nm(n,t_now)
         delta_t = G__nm*a*np.exp(-Z)
         t[m]= delta_t
@@ -70,9 +72,7 @@ def Fukasawa_scheme(n,T):#今回最も特殊なスキーム
     for i in range(n-m+1):
         
         t[m+i] = delta_euler_t
-        W[m+i] = np.random.normal(0,sigma_euler_t) 
-    print(t)
-    print(W)    
+        W[m+i] = np.random.normal(0,sigma_euler_t)    
     
     return t,W
 
@@ -133,14 +133,14 @@ def SDE_model(X,t,W,task_name_tr):
     
     X_image = conv2d(X_image, W_conv)
     t_now = 0
+    
     for i in range(depth):
         delta_t = t[i]
         delta_W = W[i]
         t_now += delta_t
         X_image = Res_flow(X_image,t_now,delta_t,delta_W,task_name_tr)
+        #X_image=tf.Print(X_image,[X_image])
         
-        Z_imagetest.append(X_image) 
-          
         
     
     
@@ -148,7 +148,7 @@ def SDE_model(X,t,W,task_name_tr):
     X_pool = tf.nn.max_pool(X_image, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1],padding = "VALID")
     
     # 全結合層
-    W_fc1 = variable([16* 16 * 64,4096],"w_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
+    W_fc1 = variable([16* 16 * 64,4096],"W_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
     b_fc1 = variable([4096],"b_fc1")
     X_pool_flat = tf.reshape(X_pool, [-1,  16* 16 * 64])#同じく
     X_fc1 = tf.nn.relu(tf.matmul(X_pool_flat, W_fc1) + b_fc1)
@@ -158,7 +158,10 @@ def SDE_model(X,t,W,task_name_tr):
     b_fc2 = variable([10],"b_fc2")
     y_conv = tf.matmul(X_fc1, W_fc2) + b_fc2
     
-    return y_conv #メインではこれがnetという名前になる 
+    net=tf.nn.softmax(y_conv)
+    
+    
+    return net #メインではこれがnetという名前になる 
 
 
 
@@ -175,12 +178,14 @@ def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr):
         return inpt+p_t*delta_t*f_x +tf.pow(p_t*(1-p_t),0.5)*delta_w*f_x
    
 def Res_func(inpt):
+    global Z_imagetest
+    
     W_conv1 = variable([3, 3, 64, 64],"W_conv1")
     b_conv1 = variable([64],"b_conv1")
     W_conv2 = variable([3, 3, 64, 64],"W_conv2")
     b_conv2 = variable([64],"b_conv2")
     
-    
+     
     inpt_ = tf.nn.relu(conv2d(inpt, W_conv1)+b_conv1)#バッチ正規化したい
     output = conv2d(inpt_, W_conv2)+b_conv2 
     
