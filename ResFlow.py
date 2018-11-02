@@ -181,9 +181,9 @@ def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr):
 def Res_func(inpt):
     global Z_imagetest
     
-    W_conv1 = variable([3, 3, 64, 64],"W_conv1")
+    W_conv1 = variable([5, 5, 64, 64],"W_conv1")
     b_conv1 = variable([64],"b_conv1")
-    W_conv2 = variable([3, 3, 64, 64],"W_conv2")
+    W_conv2 = variable([5, 5, 64, 64],"W_conv2")
     b_conv2 = variable([64],"b_conv2")
     
      
