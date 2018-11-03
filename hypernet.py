@@ -20,28 +20,26 @@ d= 32*32*64
 conv = 3*3*64*64
 bias = 64
 
-def hypernet(t):
+def hypernet(t,W1,W2,b1,b2):
     t=[[float(t)]]
-    W_h1=variable([1,10],"W_h1")
-    b_h1=variable([10],"b_h1")
+    W_h1=variable([1,100],"W_h1")
+    b_h1=variable([100],"b_h1")
     x_h1=tf.nn.relu(tf.matmul(t, W_h1) + b_h1)
-    W_h2=variable([10,400],"W_h2")
-    b_h2=variable([400],"b_h2")
+    W_h2=variable([100,100],"W_h2")
+    b_h2=variable([100],"b_h2")
     x_h2=tf.nn.relu(tf.matmul(x_h1, W_h2) + b_h2)
-    W_h3=variable([400,2*(conv+bias)],"W_h3")
-    b_h3=variable([2*(conv+bias)],"b_h3")
-    param = tf.matmul(x_h2, W_h3) + b_h3
+    W_h3=variable([100,128],"W_h3")
+    b_h3=variable([128],"b_h3")
+    out = tf.matmul(x_h2, W_h3) + b_h3
+    param= tf.nn.sigmoid(out)
     #ここから分割
-   
-    Wb1 = param[0,0:(conv+bias)]
-    Wb2 = param[0,(conv+bias):2*(conv+bias)]
-    W1 = Wb1[0:conv]
-    b1 = Wb1[conv:(conv+bias)]
-    W2 = Wb2[0:conv]
-    b2 = Wb2[conv:(conv+bias)] 
+    sigma1=param[0,0:64]
+    sigma2=param[0,64:128]
     
-    W1=tf.reshape(W1, [3,3,64,64]) 
-    W2=tf.reshape(W2, [3,3,64,64])
+    W1 = W1*sigma1
+    b1 = b1*sigma1
+    W2 = W2*sigma2
+    b2 = b2*sigma2    
     return W1,W2,b1,b2
 
 
@@ -74,7 +72,14 @@ def model(X,task):
     
     
     for i in range(15):
-        W1,W2,b1,b2 = hypernet(i)
+        W_conv1 = variable([5, 5, 64, 64],"W_conv1")
+        b_conv1 = variable([64],"b_conv1")
+        W_conv2 = variable([5, 5, 64, 64],"W_conv2")
+        b_conv2 = variable([64],"b_conv2")
+        
+        
+        
+        W1,W2,b1,b2 = hypernet(i,W_conv1,W_conv2,b_conv1,b_conv2)
         X_image = batch_norm(X_image,[0,1,2],64,is_training)
         X_image = tf.nn.relu(conv2d(X_image, W1)+b1)
         X_image= batch_norm(X_image,[0,1,2],64,is_training)
@@ -97,8 +102,9 @@ def model(X,task):
     W_fc2 = variable([4096, 10],"W_fc2")
     b_fc2 = variable([10],"b_fc2")
     y_conv = tf.matmul(X_fc1, W_fc2) + b_fc2
-    
+    y_conv=tf.Print(y_conv,[y_conv])
     net=tf.nn.softmax(y_conv)
+    
     return net
     
 
@@ -125,6 +131,7 @@ for j in range(10):
                        Y:Y_train[0:100],
                        task:"train"}
     sess.run([train_op],feed_dict=feed_dict_train)
+    print(sess.run(net,feed_dict=feed_dict_train))
     print(sess.run(tf.argmax(net, 1),feed_dict=feed_dict_train))
     print(sess.run(accuracy,feed_dict=feed_dict_train))
 feed_dict_test = {X:X_test[0:100],
