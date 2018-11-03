@@ -43,7 +43,7 @@ def run():
     task_name_tr = tf.placeholder("string")
     
     net = RF.SDE_model(X,time_list,W_list,task_name)
-    cross_entropy = -tf.reduce_sum(Y*tf.log(tf.clip_by_value(net,1e-30,1.0)))
+    cross_entropy = -tf.reduce_sum(Y*tf.log(tf.clip_by_value(net,1e-10,1.0)))
     #opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
     opt=tf.train.GradientDescentOptimizer(learning_rate)
     train_op = opt.minimize(cross_entropy)
@@ -56,7 +56,7 @@ def run():
     batch_size = args.batch_size
     num_data = X_train.shape[0]
     
-    for j in range (10):
+    for j in range (30):
         sff_idx = np.random.permutation(num_data)
         for idx in range(0, num_data, batch_size):
             
@@ -64,7 +64,9 @@ def run():
             if idx + batch_size < num_data else num_data]]
             batch_y = Y_train[sff_idx[idx: idx + batch_size
             if idx + batch_size < num_data else num_data]]
+            
             t,W = RF.tW_def(depth,task_name)
+            
             feed_dict_train={
                 X: batch_x, 
                 Y: batch_y,
@@ -72,14 +74,15 @@ def run():
                 time_list:t,
                 W_list:W,
                 task_name_tr:task_name}
-            
+            print(sess.run(cross_entropy,feed_dict=feed_dict_train))
+            print(sess.run(tf.argmax(net, 1),feed_dict=feed_dict_train))
             sess.run([train_op], feed_dict=feed_dict_train)
             count = 0
             #for z in (RF.Z_imagetest):
             #print(sess.run(net,feed_dict= feed_dict_train))
                 #assert(not np.isnan(sess.run(z,feed_dict=feed_dict_train)).any())
                 #count += 1
-            print(sess.run(cross_entropy,feed_dict=feed_dict_train))
+            
             #if j % 512 == 0:
             #    a=1
         if j % 10 ==0 :
