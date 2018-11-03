@@ -13,11 +13,11 @@ LEARNING_RATE = 1e-3
 DATASET_DIRECTORY = "datasets"
 MODEL_DIRECTORY = "model"
 GPU = 0
-task_name="Fukasawa_scheme"
+#task_name="Fukasawa_scheme"
 # task_name = "Simplicity_scheme"
 # task_name = "Euler_Maruyama_scheme"
 # task_name = "Milstein_scheme"
-# task_name = "ODEnet"
+task_name = "ODEnet"
 
 depth=52
 
@@ -74,7 +74,7 @@ def run():
                 time_list:t,
                 W_list:W,
                 task_name_tr:task_name}
-            print(sess.run(cross_entropy,feed_dict=feed_dict_train))
+            print(sess.run(net,feed_dict=feed_dict_train))
             print(sess.run(tf.argmax(net, 1),feed_dict=feed_dict_train))
             sess.run([train_op], feed_dict=feed_dict_train)
             count = 0
