@@ -71,7 +71,9 @@ def Fukasawa_scheme(n,T):#今回最も特殊なスキーム
     
     delta_euler_t = (T-t_now)/(n-m+1) 
     sigma_euler_t = np.power(delta_euler_t,0.5)
-    for i in range(n-m+1):        
+    for i in range(n-m+1):
+        
+        
         t[m+i] = delta_euler_t
         W[m+i] = sigma_euler_t*N_list[m+i]   
     
@@ -168,7 +170,7 @@ def SDE_model(X,t,W,task_name_tr):
 
 def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr):
     
-    f_x = Res_func(inpt)
+    f_x = Res_func(inpt,task_name_tr)
     p_t = p(t_now)
     
     if task_name_tr == "Milstein_scheme":
@@ -177,17 +179,43 @@ def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr):
         return inpt+delta_t*f_x
     else:
         return inpt+p_t*delta_t*f_x +tf.pow(p_t*(1-p_t),0.5)*delta_w*f_x
-   
-def Res_func(inpt):
+
+
+def batch_norm(X, axes, shape, is_training):
+    """
+    バッチ正規化
+    平均と分散による各レイヤの入力を正規化(白色化)する
+    """
+    if is_training is False:
+        return X
+    epsilon = 1e-8
+    # 平均と分散
+    mean, variance = tf.nn.moments(X, axes)
+    # scaleとoffsetも学習対象
+    scale = tf.Variable(tf.ones([shape]))
+    offset = tf.Variable(tf.zeros([shape]))
+    return tf.nn.batch_normalization(X, mean, variance, offset, scale, epsilon)
+
+
+
+
+
+def Res_func(inpt,task_name):
     global Z_imagetest
-    
-    W_conv1 = variable([5, 5, 64, 64],"W_conv1")
+    if task_name=="test":
+        is_training = False
+    else:
+        is_training = True
+    W_conv1 = variable([3, 3, 64, 64],"W_conv1")
     b_conv1 = variable([64],"b_conv1")
-    W_conv2 = variable([5, 5, 64, 64],"W_conv2")
+    W_conv2 = variable([3, 3, 64, 64],"W_conv2")
     b_conv2 = variable([64],"b_conv2")
     
-     
-    inpt_ = tf.nn.relu(conv2d(inpt, W_conv1)+b_conv1)#バッチ正規化したい
+    inpt = batch_norm(inpt,[0,1,2],64,is_training)
+    inpt_ = tf.nn.relu(conv2d(inpt, W_conv1)+b_conv1)
+    inpt_ = batch_norm(inpt_,[0,1,2],64,is_training)
+    
+    
     output = conv2d(inpt_, W_conv2)+b_conv2 
     
     
