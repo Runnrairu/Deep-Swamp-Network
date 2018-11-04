@@ -208,6 +208,25 @@ def batch_norm(X, axes, shape, is_training):
     offset = tf.Variable(tf.zeros([shape]))
     return tf.nn.batch_normalization(X, mean, variance, offset, scale, epsilon)
 
+def hypernet3(t):
+    t=[[t]]
+    W_h1=variable([1,10],"W_h1",True)
+    b_h1=variable([10],"b_h1",True)
+    x_h1=tf.nn.relu(tf.matmul(t, W_h1) + b_h1)
+    W_h3=variable([10,2*(conv+bias)],"W_h3",True)
+    b_h3=variable([2*(conv+bias)],"b_h3",True)
+    out = tf.matmul(x_h1, W_h3) + b_h3
+    #param= tf.nn.sigmoid(out)
+    
+    #ここから分割
+    W1=out[0,0:conv]
+    b1=out[0,conv:conv+bias]
+    W2=out[0,conv+bias:2*conv+bias]
+    b2=out[0,2*conv+bias:2*(conv+bias)]
+    W1=tf.reshape(W1,[3,3,64,64])
+    W2=tf.reshape(W2,[3,3,64,64])
+       
+    return W1,W2,b1,b2
 
 def hypernet(t,W1,W2,b1,b2):
     t=[[t]]
