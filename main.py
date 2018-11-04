@@ -59,7 +59,7 @@ def run():
     saver = tf.train.Saver()
     batch_size = args.batch_size
     num_data = X_train.shape[0]
-    t_test,W_test = RF.tW_def(depth,"test")
+    
     print( "initial : %.3f " % sess.run(accuracy,feed_dict={
         X: X_test,
         Y: Y_test,
@@ -99,8 +99,8 @@ def run():
         if j == 0 or j % 10 == 9 or j+1==EPOCH : # 最初 , 10回ごと , 最後　のどれかならテストしてみる
             t_test,W_test = RF.tW_def(depth,"test")
             feed_dict_test={
-                X: X_test[0:1000],
-                Y: Y_test[0:1000],
+                X: X_test,
+                Y: Y_test,
                 time_list:t_test,
                 W_list:W_test,
                 task_name_tr:"test"}
@@ -109,7 +109,7 @@ def run():
             print("saved!")
             print( "accuracy after epoch %d : %.3f " % sess.run(accuracy,feed_dict=feed_dict_test))
            # accuracy_summary = tf.scalar_summary("accuracy", accuracy)
-    print(acc)
+    
 
     sess.close()
 import time
