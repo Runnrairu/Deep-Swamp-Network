@@ -22,6 +22,12 @@ task_name = "ODEnet"
 
 depth=52
 
+hypernet = (["W_conv1","b_conv1","W_conv2","b_conv2"],
+            ["W_conv1","b_conv1","W_conv2","b_conv2","W_h1","b_h1","W_h2","b_h2"],
+            ["W_h1_2","b_h1_2","W_h2_2","b_h2_2"])
+
+
+
 def run():
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--model_directory', type=str, default=MODEL_DIRECTORY)
@@ -49,8 +55,19 @@ def run():
     net = RF.SDE_model(X,time_list,W_list,task_name)
     cross_entropy = -tf.reduce_sum(Y*tf.log(tf.clip_by_value(net,1e-10,1.0)))
     #opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
-    opt=tf.train.GradientDescentOptimizer(learning_rate)
-    train_op = opt.minimize(cross_entropy)
+    var_list1 = ["W_conv","b_conv"]+hypernet[0]
+    var_list2 = ["W_fc1","b_fc1","W_fc2","b_fc2","W_fc3","b_fc3"]
+    opt1 = tf.train.GradientDescentOptimizer(0.000001)
+    opt2 = tf.train.GradientDescentOptimizer(0.0001)
+    grads = tf.gradients(cross_entropy, var_list1 + var_list2)
+    grads1 = grads[:len(var_list1)]
+    grads2 = grads[len(var_list1):]
+    tran_op1 = opt1.apply_gradients(zip(grads1, var_list1))
+    train_op2 = opt2.apply_gradients(zip(grads2, var_list2))
+    train_op = tf.group(train_op1, train_op2)
+    
+    
+    
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
     correct_prediction = tf.equal(tf.argmax(net, 1), tf.argmax(Y, 1))
