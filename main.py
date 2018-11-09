@@ -42,8 +42,8 @@ def run():
     X_train, Y_train, X_test, Y_test = load_data.load()
 
     #縮小する
-    #X_train, Y_train = X_train[0:5000], Y_train[0:5000]
-    #X_test, Y_test = X_test[0:1000] , Y_test[0:1000]
+    X_train, Y_train = X_train[0:5000], Y_train[0:5000]
+    X_test, Y_test = X_test[0:1000] , Y_test[0:1000]
 
     X = tf.placeholder("float", [None, 32, 32, 3])
     Y = tf.placeholder("float", [None, 10])
@@ -55,34 +55,35 @@ def run():
     net = RF.SDE_model(X,time_list,W_list,task_name)
     cross_entropy = -tf.reduce_sum(Y*tf.log(tf.clip_by_value(net,1e-10,1.0)))
     #opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
-    var_list1 = ["W_conv","b_conv"]+hypernet[0]
-    var_list2 = ["W_fc1","b_fc1","W_fc2","b_fc2","W_fc3","b_fc3"]
-    opt1 = tf.train.GradientDescentOptimizer(0.000001)
-    opt2 = tf.train.GradientDescentOptimizer(0.0001)
-    grads = tf.gradients(cross_entropy, var_list1 + var_list2)
-    grads1 = grads[:len(var_list1)]
-    grads2 = grads[len(var_list1):]
-    tran_op1 = opt1.apply_gradients(zip(grads1, var_list1))
-    train_op2 = opt2.apply_gradients(zip(grads2, var_list2))
-    train_op = tf.group(train_op1, train_op2)
-    
-    
-    
+    var_name_list1 = ["W_conv","b_conv"]+hypernet[0]
+    var_name_list2 = ["W_fc1","b_fc1","W_fc2","b_fc2","W_fc3","b_fc3"]
+
+    train_op = None
+
     sess = tf.Session()
-    sess.run(tf.global_variables_initializer())
+
+
     correct_prediction = tf.equal(tf.argmax(net, 1), tf.argmax(Y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
     saver = tf.train.Saver()
     batch_size = args.batch_size
     num_data = X_train.shape[0]
-    
-    print( "initial : %.3f " % sess.run(accuracy,feed_dict={
-        X: X_test,
-        Y: Y_test,
-        time_list:t_test,
-        W_list:W_test,
-        task_name_tr:"test"}) )
+
+    t,W = RF.tW_def(depth,task_name)
+
+    with tf.variable_scope("scope", reuse=tf.AUTO_REUSE):
+        var_list1 = [ tf.get_variable(name=x) for x in var_name_list1 ]
+        var_list2 = [ tf.get_variable(name=x) for x in var_name_list2 ]
+
+    train_op1 = tf.train.MomentumOptimizer(1e-6, 0.9 ).minimize(cross_entropy,var_list = var_list1 )  # tf.train.GradientDescentOptimizer(0.000001)
+    train_op2 = tf.train.MomentumOptimizer(1e-4, 0.9 ).minimize(cross_entropy,var_list = var_list2 ) # tf.train.GradientDescentOptimizer(0.0001)
+    train_op = tf.group(train_op1, train_op2)
+
+    sess.run(tf.global_variables_initializer())
+    sess.run(tf.local_variables_initializer())
+    print( tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES ) )
+
     for j in range (EPOCH):
         sff_idx = np.random.permutation(num_data)
         for idx in range(0, num_data, batch_size):
@@ -100,6 +101,7 @@ def run():
                 time_list:t,
                 W_list:W,
                 task_name_tr:task_name}
+
             #print(sess.run(net,feed_dict=feed_dict_train))
             #print(sess.run(tf.argmax(net, 1),feed_dict=feed_dict_train))
             sess.run([train_op], feed_dict=feed_dict_train)
@@ -122,11 +124,11 @@ def run():
                 W_list:W_test,
                 task_name_tr:"test"}
             print("saving checkpoint...")
-            saver.save(sess,"model/model.ckpt"+"step"+str(j)+datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
+            saver.save(sess,"F:/model/model.ckpt"+"step"+str(j)+datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
             print("saved!")
-            print( "accuracy after epoch %d : %.3f " % sess.run(accuracy,feed_dict=feed_dict_test))
+            print( "accuracy after epoch %d : %.3f " % (j,sess.run(accuracy,feed_dict=feed_dict_test) ))
            # accuracy_summary = tf.scalar_summary("accuracy", accuracy)
-    
+
 
     sess.close()
 import time
