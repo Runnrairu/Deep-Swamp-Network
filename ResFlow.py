@@ -27,15 +27,24 @@ def tW_def(n,task_name):
     W=[]
     if task_name == "Fukasawa_scheme":
         t,W = Fukasawa_scheme(n,T)
-    elif task_name == "Simplicity_scheme":
+    elif task_name == "Simplicity_scheme" or "Stochastic_Depth":
         t,W = Simplicity_scheme(n,T)
     elif task_name == "Euler_Maruyama_scheme" or task_name == "Milstein_scheme":
         t,W = Euler_Maruyama_scheme(n,T)
-    elif task_name == "ODEnet" or task_name=="test" :
+    elif task_name == "ODEnet" or task_name=="test" or task_name =="ResNet":
         t,W = ODEnet(n,T)
+
     else:
         print("Invarid!")
     return t,W
+
+
+
+
+    
+    
+    
+
 
 
 
@@ -154,7 +163,7 @@ def SDE_model(X,t,W,task_name_tr):
         delta_t = t[i]
         delta_W = W[i]
         t_now += delta_t
-        X_image = Res_flow(X_image,t_now,delta_t,delta_W,task_name_tr)
+        X_image = Res_flow(X_image,t_now,delta_t,delta_W,task_name_tr,i)
         #X_image=tf.Print(X_image,[X_image])
 
 
@@ -186,15 +195,15 @@ def SDE_model(X,t,W,task_name_tr):
 
 
 
-def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr):
+def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr,count):
 
-    f_x = Res_func(inpt,task_name_tr,t_now)
+    f_x = Res_func(inpt,task_name_tr,t_now,count)
     p_t = p(t_now)
 
     if task_name_tr == "Milstein_scheme":
         return inpt+p_t*delta_t*f_x +tf.pow(p_t*(1-p_t),0.5)*delta_w*f_x+mil()*(np.pow(delta_w,2)-delta_t)#ミルシュタインスキーム特有のやつ
-    elif task_name_tr =="ODEnet" or task_name_tr=="test":
-        return inpt+delta_t*f_x
+    elif task_name_tr =="ODEnet" or task_name_tr=="test" or task_name_tr =="ResNet":
+        return inpt+delta_t*f_x  
     else:
         return inpt+p_t*delta_t*f_x +tf.pow(p_t*(1-p_t),0.5)*delta_w*f_x
 
@@ -257,17 +266,24 @@ def hypernet(t,W1,W2,b1,b2):
     return W1,W2,b1,b2
 
 
-def Res_func(inpt,task_name,t_now):
-    global Z_imagetest
-    if task_name=="test":
+def Res_func(inpt,task_name,t_now,count):
+    
+    if task_name=="test" or task_name=="ResNet_test":
         is_training = False
     else:
         is_training = True
     
-    W_conv1 = variable([3, 3, 64, 64],"W_conv1",True)
-    b_conv1 = variable([64],"b_conv1",True)
-    W_conv2 = variable([3, 3, 64, 64],"W_conv2",True)
-    b_conv2 = variable([64],"b_conv2",True)
+    if task_name == "ResNet" or task_name=="Stochastic_Depth":
+        W_conv1 = variable([3, 3, 64, 64],"W_conv1"+str(count),True)
+        b_conv1 = variable([64],"b_conv1"+str(count),True)
+        W_conv2 = variable([3, 3, 64, 64],"W_conv2"+str(count),True)
+        b_conv2 = variable([64],"b_conv2"+str(count),True)
+    
+    else:
+        W_conv1 = variable([3, 3, 64, 64],"W_conv1",True)
+        b_conv1 = variable([64],"b_conv1",True)
+        W_conv2 = variable([3, 3, 64, 64],"W_conv2",True)
+        b_conv2 = variable([64],"b_conv2",True)
     #W_conv1,W_conv2,b_conv1,b_conv2=hypernet(t_now,W_conv1,W_conv2,b_conv1,b_conv2)
     inpt = batch_norm(inpt,[0,1,2],64,is_training,"1")
     inpt_ = tf.nn.relu(conv2d(inpt, W_conv1)+b_conv1)
