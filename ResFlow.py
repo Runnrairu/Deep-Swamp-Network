@@ -31,7 +31,7 @@ def tW_def(n,task_name):
         t,W = Simplicity_scheme(n,T)
     elif task_name == "Euler_Maruyama_scheme" or task_name == "Milstein_scheme":
         t,W = Euler_Maruyama_scheme(n,T)
-    elif task_name == "ODEnet" or task_name=="test" or task_name =="ResNet":
+    elif task_name == "ODEnet" or task_name=="test" or task_name =="ResNet" or task_name =="ResNet_test":
         t,W = ODEnet(n,T)
 
     else:
@@ -202,7 +202,7 @@ def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr,count):
 
     if task_name_tr == "Milstein_scheme":
         return inpt+p_t*delta_t*f_x +tf.pow(p_t*(1-p_t),0.5)*delta_w*f_x+mil()*(np.pow(delta_w,2)-delta_t)#ミルシュタインスキーム特有のやつ
-    elif task_name_tr =="ODEnet" or task_name_tr=="test" or task_name_tr =="ResNet":
+    elif task_name_tr =="ODEnet" or task_name_tr=="test" or task_name_tr =="ResNet" or task_name_tr =="ResNet_test":
         return inpt+delta_t*f_x  
     else:
         return inpt+p_t*delta_t*f_x +tf.pow(p_t*(1-p_t),0.5)*delta_w*f_x
@@ -219,6 +219,8 @@ def batch_norm(X, axes, shape, is_training , id ):
     # 平均と分散
     mean, variance = tf.nn.moments(X, axes)
     # scaleとoffsetも学習対象
+        
+    
     scale = variable([shape],init=tf.ones([shape]),var_name="batch_scale_%s" % id )
     offset = variable([shape],init=tf.zeros([shape]),var_name="batch_offset_%s" % id )
     return tf.nn.batch_normalization(X, mean, variance, offset, scale, epsilon)
@@ -285,9 +287,14 @@ def Res_func(inpt,task_name,t_now,count):
         W_conv2 = variable([3, 3, 64, 64],"W_conv2",True)
         b_conv2 = variable([64],"b_conv2",True)
     #W_conv1,W_conv2,b_conv1,b_conv2=hypernet(t_now,W_conv1,W_conv2,b_conv1,b_conv2)
-    inpt = batch_norm(inpt,[0,1,2],64,is_training,"1")
-    inpt_ = tf.nn.relu(conv2d(inpt, W_conv1)+b_conv1)
-    inpt_ = batch_norm(inpt_,[0,1,2],64,is_training,"2")
+    if task_name == "ResNet" or task_name =="ResNet_test" or task_name =="Stochastic_Depth":
+        inpt = batch_norm(inpt,[0,1,2],64,is_training,"1_"+str(count))
+        inpt_ = tf.nn.relu(conv2d(inpt, W_conv1)+b_conv1)
+        inpt_ = batch_norm(inpt_,[0,1,2],64,is_training,"2_"+str(count))
+    else:
+        inpt = batch_norm(inpt,[0,1,2],64,is_training,"1")
+        inpt_ = tf.nn.relu(conv2d(inpt, W_conv1)+b_conv1)
+        inpt_ = batch_norm(inpt_,[0,1,2],64,is_training,"2")
 
 
     output = conv2d(inpt_, W_conv2)+b_conv2
