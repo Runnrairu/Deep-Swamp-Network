@@ -19,6 +19,10 @@ GPU = 0
 # task_name = "Simplicity_scheme"
 # task_name = "Euler_Maruyama_scheme"
 # task_name = "Milstein_scheme"
+# task_name = "ResNet"
+# task_name = "Stochastic_Depth"
+# task_name = "ResNet_test"
+# task_name = "test"
 task_name = "ODEnet"
 
 depth=52
@@ -75,9 +79,13 @@ def run():
         var_list1 = [ tf.get_variable(name=x) for x in var_name_list1 ]
         var_list2 = [ tf.get_variable(name=x) for x in var_name_list2 ]
 
+    if task_name == "ResNet" or task_name =="ResNet_test" or task_name =="Stochastic_Depth":
+        learning_late = 1e-4
+    else:
+        learning_late = 1e-6
 #    train_op1 = tf.train.MomentumOptimizer( 1e-6 , 0.9 ).minimize(cross_entropy,var_list = var_list1 )  # tf.train.GradientDescentOptimizer(0.000001)
 #    train_op2 = tf.train.MomentumOptimizer( 1e-6 , 0.9 ).minimize(cross_entropy,var_list = var_list2 ) # tf.train.GradientDescentOptimizer(0.0001)
-    train_op = tf.train.MomentumOptimizer( 1e-6 , 0.9 ).minimize(cross_entropy) # tf.group(train_op1, train_op2)  # tf.train.GradientDescentOptimizer( 1e-6 ).minimize(cross_entropy) #
+    train_op = tf.train.MomentumOptimizer( learning_late , 0.9 ).minimize(cross_entropy) # tf.group(train_op1, train_op2)  # tf.train.GradientDescentOptimizer( 1e-6 ).minimize(cross_entropy) #
 
     sess.run(tf.global_variables_initializer())
 
