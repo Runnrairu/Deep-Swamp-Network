@@ -13,6 +13,7 @@ LEARNING_RATE = 1e-6
 EPOCH = 10
 DATASET_DIRECTORY = "datasets"
 MODEL_DIRECTORY = "model"
+SAVE_ENABLE = False
 GPU = 0
 #task_name="Fukasawa_scheme"
 # task_name = "Simplicity_scheme"
@@ -62,7 +63,6 @@ def run():
 
     sess = tf.Session()
 
-
     correct_prediction = tf.equal(tf.argmax(net, 1), tf.argmax(Y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
@@ -70,19 +70,18 @@ def run():
     batch_size = args.batch_size
     num_data = X_train.shape[0]
 
-    t,W = RF.tW_def(depth,task_name)
 
-    with tf.variable_scope("scope", reuse=tf.AUTO_REUSE):
+    with tf.variable_scope("scope", reuse=True ):
         var_list1 = [ tf.get_variable(name=x) for x in var_name_list1 ]
         var_list2 = [ tf.get_variable(name=x) for x in var_name_list2 ]
 
-    train_op1 = tf.train.MomentumOptimizer(1e-6, 0.9 ).minimize(cross_entropy,var_list = var_list1 )  # tf.train.GradientDescentOptimizer(0.000001)
-    train_op2 = tf.train.MomentumOptimizer(1e-4, 0.9 ).minimize(cross_entropy,var_list = var_list2 ) # tf.train.GradientDescentOptimizer(0.0001)
-    train_op = tf.group(train_op1, train_op2)
+#    train_op1 = tf.train.MomentumOptimizer( 1e-6 , 0.9 ).minimize(cross_entropy,var_list = var_list1 )  # tf.train.GradientDescentOptimizer(0.000001)
+#    train_op2 = tf.train.MomentumOptimizer( 1e-6 , 0.9 ).minimize(cross_entropy,var_list = var_list2 ) # tf.train.GradientDescentOptimizer(0.0001)
+    train_op = tf.train.MomentumOptimizer( 1e-6 , 0.9 ).minimize(cross_entropy) # tf.group(train_op1, train_op2)  # tf.train.GradientDescentOptimizer( 1e-6 ).minimize(cross_entropy) #
 
     sess.run(tf.global_variables_initializer())
-    sess.run(tf.local_variables_initializer())
-    print( tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES ) )
+
+    print(tf.trainable_variables())
 
     for j in range (EPOCH):
         sff_idx = np.random.permutation(num_data)
@@ -104,6 +103,7 @@ def run():
 
             #print(sess.run(net,feed_dict=feed_dict_train))
             #print(sess.run(tf.argmax(net, 1),feed_dict=feed_dict_train))
+
             sess.run([train_op], feed_dict=feed_dict_train)
             count = 0
             #for z in (RF.Z_imagetest):
@@ -123,9 +123,10 @@ def run():
                 time_list:t_test,
                 W_list:W_test,
                 task_name_tr:"test"}
-            print("saving checkpoint...")
-            saver.save(sess,"F:/model/model.ckpt"+"step"+str(j)+datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
-            print("saved!")
+            if SAVE_ENABLE :
+                print("saving checkpoint...")
+                saver.save(sess,"model/model.ckpt"+"step"+str(j)+datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
+                print("saved!")
             print( "accuracy after epoch %d : %.3f " % (j,sess.run(accuracy,feed_dict=feed_dict_test) ))
            # accuracy_summary = tf.scalar_summary("accuracy", accuracy)
 
