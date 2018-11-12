@@ -145,11 +145,11 @@ def variable(shape,var_name,Flow=False,init=None):
                 var = tf.get_variable(name=var_name,shape=shape,initializer = init )
     return var
 
-Z_imagetest = []
 
-def SDE_model(X,t,W,task_name_tr):
-    global Z_imagetest
-    Z_imagetest=[]
+
+def SDE_model(X,t,W,task_name_tr,hypernet):
+    
+    
     depth =52
 
     W_conv = variable([5, 5, 3, 64],"W_conv")
@@ -163,7 +163,7 @@ def SDE_model(X,t,W,task_name_tr):
         delta_t = t[i]
         delta_W = W[i]
         t_now += delta_t
-        X_image = Res_flow(X_image,t_now,delta_t,delta_W,task_name_tr,i)
+        X_image = Res_flow(X_image,t_now,delta_t,delta_W,task_name_tr,i,hypernet)
         #X_image=tf.Print(X_image,[X_image])
 
 
@@ -195,9 +195,9 @@ def SDE_model(X,t,W,task_name_tr):
 
 
 
-def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr,count):
+def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr,count,hypernet):
 
-    f_x = Res_func(inpt,task_name_tr,t_now,count)
+    f_x = Res_func(inpt,task_name_tr,t_now,count,hypernet)
     p_t = p(t_now)
 
     if task_name_tr == "Milstein_scheme":
@@ -208,7 +208,7 @@ def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr,count):
         return inpt+p_t*delta_t*f_x +tf.pow(p_t*(1-p_t),0.5)*delta_w*f_x
 
 
-def batch_norm(X, axes, shape, is_training , id ):
+def batch_norm(X, axes, shape, is_training , id ,hypernet):
     """
     バッチ正規化
     平均と分散による各レイヤの入力を正規化(白色化)する
@@ -225,7 +225,7 @@ def batch_norm(X, axes, shape, is_training , id ):
     offset = variable([shape],init=tf.zeros([shape]),var_name="batch_offset_%s" % id )
     return tf.nn.batch_normalization(X, mean, variance, offset, scale, epsilon)
 
-def hypernet3(t):
+def hypernet2(t):
     t=[[t]]
     W_h1=variable([1,10],"W_h1",True)
     b_h1=variable([10],"b_h1",True)
@@ -268,25 +268,29 @@ def hypernet(t,W1,W2,b1,b2):
     return W1,W2,b1,b2
 
 
-def Res_func(inpt,task_name,t_now,count):
+def Res_func(inpt,task_name,t_now,count,hypernet):
     
     if task_name=="test" or task_name=="ResNet_test":
         is_training = False
     else:
         is_training = True
     
-    if task_name == "ResNet" or task_name=="Stochastic_Depth":
+    if task_name == "ResNet" or task_name=="Stochastic_Depth" or task_name=="ResNet_test" :
         W_conv1 = variable([3, 3, 64, 64],"W_conv1"+str(count),True)
         b_conv1 = variable([64],"b_conv1"+str(count),True)
         W_conv2 = variable([3, 3, 64, 64],"W_conv2"+str(count),True)
         b_conv2 = variable([64],"b_conv2"+str(count),True)
     
-    else:
+    elif hypernet == "N" or hypernet == "1":
         W_conv1 = variable([3, 3, 64, 64],"W_conv1",True)
         b_conv1 = variable([64],"b_conv1",True)
         W_conv2 = variable([3, 3, 64, 64],"W_conv2",True)
         b_conv2 = variable([64],"b_conv2",True)
-    #W_conv1,W_conv2,b_conv1,b_conv2=hypernet(t_now,W_conv1,W_conv2,b_conv1,b_conv2)
+        if hypernet=="1":
+            W_conv1,W_conv2,b_conv1,b_conv2=hypernet(t_now,W_conv1,W_conv2,b_conv1,b_conv2)
+    elif hypernet=="2":
+        W_conv1,W_conv2,b_conv1,b_conv2=hypernet(t_now)
+        
     if task_name == "ResNet" or task_name =="ResNet_test" or task_name =="Stochastic_Depth":
         inpt = batch_norm(inpt,[0,1,2],64,is_training,"1_"+str(count))
         inpt_ = tf.nn.relu(conv2d(inpt, W_conv1)+b_conv1)
