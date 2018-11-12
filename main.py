@@ -137,8 +137,8 @@ def run():
                 Y: Y_test,
                 time_list:t_test,
                 W_list:W_test,
-                task_name_tr:task_name_test,
-                hypernet:HYPER_NET}
+                task_name_tr:task_name_test
+                }
             if SAVE_ENABLE :
                 print("saving checkpoint...")
                 saver.save(sess,"model/model.ckpt"+"step"+str(j)+datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
