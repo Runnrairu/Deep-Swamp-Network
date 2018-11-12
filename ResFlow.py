@@ -245,7 +245,7 @@ def hypernet2(t):
 
     return W1,W2,b1,b2
 
-def hypernet(t,W1,W2,b1,b2):
+def hypernet1(t,W1,W2,b1,b2):
     t=[[t]]
     W_h1=variable([1,100],"W_h1",True)
     b_h1=variable([100],"b_h1",True)
