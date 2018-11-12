@@ -7,7 +7,9 @@ import os
 import datetime
 
 
-
+HYPER_NET = "N"
+#HYPER_NET = "1"
+#HYPER_NET = "2"
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-6
 EPOCH = 10
@@ -55,9 +57,10 @@ def run():
     time_list = tf.placeholder("float", [None])
     W_list = tf.placeholder("float", [None])
     learning_rate = tf.placeholder("float", [])
+    hypernet = tf.placeholder("string")
     task_name_tr = tf.placeholder("string")
 
-    net = RF.SDE_model(X,time_list,W_list,task_name)
+    net = RF.SDE_model(X,time_list,W_list,task_name,hypernet)
     cross_entropy = -tf.reduce_sum(Y*tf.log(tf.clip_by_value(net,1e-10,1.0)))
     #opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
     var_name_list1 = ["W_conv","b_conv"]+hypernet[0]
@@ -107,13 +110,14 @@ def run():
                 learning_rate: args.learning_rate,
                 time_list:t,
                 W_list:W,
-                task_name_tr:task_name}
+                task_name_tr:task_name
+                hypernet:HYPER_NET}
 
             #print(sess.run(net,feed_dict=feed_dict_train))
             #print(sess.run(tf.argmax(net, 1),feed_dict=feed_dict_train))
 
             sess.run([train_op], feed_dict=feed_dict_train)
-            count = 0
+            
             #for z in (RF.Z_imagetest):
             #print(sess.run(net,feed_dict= feed_dict_train))
                 #assert(not np.isnan(sess.run(z,feed_dict=feed_dict_train)).any())
@@ -125,12 +129,17 @@ def run():
             #    a=1
         if j == 0 or j % 10 == 9 or j+1==EPOCH : # 最初 , 10回ごと , 最後　のどれかならテストしてみる
             t_test,W_test = RF.tW_def(depth,"test")
+            if task_name == "ResNet" or task_name =="Stochastic_Depth":
+                task_name_test = "ResNet_test"
+            else:
+                task_name_test = "test"
             feed_dict_test={
                 X: X_test,
                 Y: Y_test,
                 time_list:t_test,
                 W_list:W_test,
-                task_name_tr:"test"}
+                task_name_tr:task_name_test,
+                hypernet:HYPER_NET}
             if SAVE_ENABLE :
                 print("saving checkpoint...")
                 saver.save(sess,"model/model.ckpt"+"step"+str(j)+datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
