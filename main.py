@@ -57,9 +57,8 @@ def run():
     time_list = tf.placeholder("float", [None])
     W_list = tf.placeholder("float", [None])
     learning_rate = tf.placeholder("float", [])
-    hypernet = tf.placeholder("string")
     task_name_tr = tf.placeholder("string")
-
+    hypernet=HYPER_NET
     net = RF.SDE_model(X,time_list,W_list,task_name,hypernet)
     cross_entropy = -tf.reduce_sum(Y*tf.log(tf.clip_by_value(net,1e-10,1.0)))
     #opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
@@ -111,7 +110,7 @@ def run():
                 time_list:t,
                 W_list:W,
                 task_name_tr:task_name
-                hypernet:HYPER_NET}
+                }
 
             #print(sess.run(net,feed_dict=feed_dict_train))
             #print(sess.run(tf.argmax(net, 1),feed_dict=feed_dict_train))
