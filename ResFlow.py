@@ -41,9 +41,9 @@ def tW_def(n,task_name):
 
 
 
-    
-    
-    
+
+
+
 
 
 
@@ -147,9 +147,9 @@ def variable(shape,var_name,Flow=False,init=None):
 
 
 
-def SDE_model(X,t,W,task_name_tr,hypernet):
-    
-    
+def SDE_model(X,t,W,task_name_tr,hypernet,test=False):
+
+
     depth =52
 
     W_conv = variable([5, 5, 3, 64],"W_conv")
@@ -163,7 +163,7 @@ def SDE_model(X,t,W,task_name_tr,hypernet):
         delta_t = t[i]
         delta_W = W[i]
         t_now += delta_t
-        X_image = Res_flow(X_image,t_now,delta_t,delta_W,task_name_tr,i,hypernet)
+        X_image = Res_flow(X_image,t_now,delta_t,delta_W,task_name_tr,i,hypernet,test)
         #X_image=tf.Print(X_image,[X_image])
 
 
@@ -195,15 +195,15 @@ def SDE_model(X,t,W,task_name_tr,hypernet):
 
 
 
-def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr,count,hypernet):
+def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr,count,hypernet,f_test):
 
-    f_x = Res_func(inpt,task_name_tr,t_now,count,hypernet)
+    f_x = Res_func(inpt,task_name_tr,t_now,count,hypernet,f_test)
     p_t = p(t_now)
 
     if task_name_tr == "Milstein_scheme":
         return inpt+p_t*delta_t*f_x +tf.pow(p_t*(1-p_t),0.5)*delta_w*f_x+mil()*(np.pow(delta_w,2)-delta_t)#ミルシュタインスキーム特有のやつ
     elif task_name_tr =="ODEnet" or task_name_tr=="test" or task_name_tr =="ResNet" or task_name_tr =="ResNet_test":
-        return inpt+delta_t*f_x  
+        return inpt+delta_t*f_x
     else:
         return inpt+p_t*delta_t*f_x +tf.pow(p_t*(1-p_t),0.5)*delta_w*f_x
 
@@ -219,14 +219,16 @@ def batch_norm(X, axes, shape, is_training , id ,hypernet):
     # 平均と分散
     mean, variance = tf.nn.moments(X, axes)
     # scaleとoffsetも学習対象
-        
     
+
     scale = variable([shape],init=tf.ones([shape]),var_name="batch_scale_%s" % id )
     offset = variable([shape],init=tf.zeros([shape]),var_name="batch_offset_%s" % id )
     return tf.nn.batch_normalization(X, mean, variance, offset, scale, epsilon)
 
 def hypernet2(t):
     t=[[t]]
+    conv=3*3*64*64
+    bias=64
     W_h1=variable([1,10],"W_h1",True)
     b_h1=variable([10],"b_h1",True)
     x_h1=tf.nn.relu(tf.matmul(t, W_h1) + b_h1)
@@ -268,37 +270,32 @@ def hypernet1(t,W1,W2,b1,b2):
     return W1,W2,b1,b2
 
 
-def Res_func(inpt,task_name,t_now,count,hypernet):
-    
-    if task_name=="test" or task_name=="ResNet_test":
-        is_training = False
-    else:
-        is_training = True
-    
+def Res_func(inpt,task_name,t_now,count,hypernet,f_test):
+    is_training = not f_test
     if task_name == "ResNet" or task_name=="Stochastic_Depth" or task_name=="ResNet_test" :
         W_conv1 = variable([3, 3, 64, 64],"W_conv1"+str(count),True)
         b_conv1 = variable([64],"b_conv1"+str(count),True)
         W_conv2 = variable([3, 3, 64, 64],"W_conv2"+str(count),True)
         b_conv2 = variable([64],"b_conv2"+str(count),True)
-    
+
     elif hypernet == "N" or hypernet == "1":
         W_conv1 = variable([3, 3, 64, 64],"W_conv1",True)
         b_conv1 = variable([64],"b_conv1",True)
         W_conv2 = variable([3, 3, 64, 64],"W_conv2",True)
         b_conv2 = variable([64],"b_conv2",True)
         if hypernet=="1":
-            W_conv1,W_conv2,b_conv1,b_conv2=hypernet(t_now,W_conv1,W_conv2,b_conv1,b_conv2)
+            W_conv1,W_conv2,b_conv1,b_conv2=hypernet1(t_now,W_conv1,W_conv2,b_conv1,b_conv2)
     elif hypernet=="2":
-        W_conv1,W_conv2,b_conv1,b_conv2=hypernet(t_now)
-        
+        W_conv1,W_conv2,b_conv1,b_conv2=hypernet2(t_now)
+
     if task_name == "ResNet" or task_name =="ResNet_test" or task_name =="Stochastic_Depth":
-        inpt = batch_norm(inpt,[0,1,2],64,is_training,"1_"+str(count))
+        inpt = batch_norm(inpt,[0,1,2],64,is_training,"1_"+str(count),hypernet=hypernet)
         inpt_ = tf.nn.relu(conv2d(inpt, W_conv1)+b_conv1)
-        inpt_ = batch_norm(inpt_,[0,1,2],64,is_training,"2_"+str(count))
+        inpt_ = batch_norm(inpt_,[0,1,2],64,is_training,"2_"+str(count),hypernet=hypernet)
     else:
-        inpt = batch_norm(inpt,[0,1,2],64,is_training,"1")
+        inpt = batch_norm(inpt,[0,1,2],64,is_training,"1",hypernet=hypernet)
         inpt_ = tf.nn.relu(conv2d(inpt, W_conv1)+b_conv1)
-        inpt_ = batch_norm(inpt_,[0,1,2],64,is_training,"2")
+        inpt_ = batch_norm(inpt_,[0,1,2],64,is_training,"2",hypernet=hypernet)
 
 
     output = conv2d(inpt_, W_conv2)+b_conv2
