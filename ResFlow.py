@@ -245,7 +245,7 @@ def hypernet2(t):
 
     return W1,W2,b1,b2
 
-def hypernet(t,W1,W2,b1,b2):
+def hypernet1(t,W1,W2,b1,b2):
     t=[[t]]
     W_h1=variable([1,100],"W_h1",True)
     b_h1=variable([100],"b_h1",True)
@@ -286,9 +286,9 @@ def Res_func(inpt,task_name,t_now,count,hypernet):
         W_conv2 = variable([3, 3, 64, 64],"W_conv2",True)
         b_conv2 = variable([64],"b_conv2",True)
         if hypernet=="1":
-            W_conv1,W_conv2,b_conv1,b_conv2=hypernet(t_now,W_conv1,W_conv2,b_conv1,b_conv2)
+            W_conv1,W_conv2,b_conv1,b_conv2=hypernet1(t_now,W_conv1,W_conv2,b_conv1,b_conv2)
     elif hypernet=="2":
-        W_conv1,W_conv2,b_conv1,b_conv2=hypernet(t_now)
+        W_conv1,W_conv2,b_conv1,b_conv2=hypernet2(t_now)
 
     if task_name == "ResNet" or task_name =="ResNet_test" or task_name =="Stochastic_Depth":
         inpt = batch_norm(inpt,[0,1,2],64,is_training,"1_"+str(count),hypernet=hypernet)

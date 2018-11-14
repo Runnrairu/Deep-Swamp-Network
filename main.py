@@ -29,7 +29,7 @@ task_name = "ODEnet"
 
 depth=52
 
-hypernet_variables = (["W_conv1","b_conv1","W_conv2","b_conv2"],
+hypernet_variable = (["W_conv1","b_conv1","W_conv2","b_conv2"],
             ["W_conv1","b_conv1","W_conv2","b_conv2","W_h1","b_h1","W_h2","b_h2"],
             ["W_h1_2","b_h1_2","W_h2_2","b_h2_2"])
 
@@ -61,13 +61,12 @@ def run():
     W_list = tf.placeholder("float", [None])
     learning_rate = tf.placeholder("float", [])
     hypernet = args.hyper_net  # tf.placeholder("string")
-    hypernet_tr = tf.placeholder("string")
     task_name_tr = tf.placeholder("string")
-
+    
     net = RF.SDE_model(X,time_list,W_list,task_name,hypernet)
     cross_entropy = -tf.reduce_sum(Y*tf.log(tf.clip_by_value(net,1e-10,1.0)))
     #opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
-    var_name_list1 = ["W_conv","b_conv"]+hypernet_variables[0]
+    var_name_list1 = ["W_conv","b_conv"]+hypernet_variable[0]
     var_name_list2 = ["W_fc1","b_fc1","W_fc2","b_fc2","W_fc3","b_fc3"]
 
     train_op = None
@@ -114,8 +113,8 @@ def run():
                 learning_rate: args.learning_rate,
                 time_list:t,
                 W_list:W,
-                task_name_tr:task_name,
-                hypernet_tr:hypernet}
+                task_name_tr:task_name
+                }
 
             #print(sess.run(net,feed_dict=feed_dict_train))
             #print(sess.run(tf.argmax(net, 1),feed_dict=feed_dict_train))
@@ -142,8 +141,8 @@ def run():
                 Y: Y_test,
                 time_list:t_test,
                 W_list:W_test,
-                task_name_tr:task_name_test,
-                hypernet_tr:hypernet}
+                task_name_tr:task_name_test
+                }
             if SAVE_ENABLE :
                 print("saving checkpoint...")
                 saver.save(sess,"model/model.ckpt"+"step"+str(j)+datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
