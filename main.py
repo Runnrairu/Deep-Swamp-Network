@@ -36,12 +36,15 @@ hypernet_variable = (["W_conv1","b_conv1","W_conv2","b_conv2"],
 
 
 def run():
+    global task_name
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--model_directory', type=str, default=MODEL_DIRECTORY)
     parser.add_argument('-dd', '--dataset_directory', type=str, default=DATASET_DIRECTORY)
     parser.add_argument('-bs', '--batch_size', type=int, default=BATCH_SIZE)
     parser.add_argument('-lr', '--learning_rate', type=float, default=LEARNING_RATE)
     parser.add_argument('-g', '--gpu', type=int, default=GPU)
+    parser.add_argument('-t', '--task_name', type=str, default=task_name)
+    parser.add_argument('-n', '--hyper_net', type=str, default=HYPER_NET)
 
     args = parser.parse_args()
     directory_output = os.path.join(args.model_directory)
@@ -57,9 +60,12 @@ def run():
     time_list = tf.placeholder("float", [None])
     W_list = tf.placeholder("float", [None])
     learning_rate = tf.placeholder("float", [])
+    hypernet = args.hyper_net  # tf.placeholder("string")
     task_name_tr = tf.placeholder("string")
-    hypernet=HYPER_NET
-    net = RF.SDE_model(X,time_list,W_list,task_name,hypernet)
+    
+    net = RF.SDE_model(X,time_list,W_list,task_name,hypernet,test=False)
+    test_net = RF.SDE_model(X,time_list,W_list,task_name,hypernet,test=True)
+    
     cross_entropy = -tf.reduce_sum(Y*tf.log(tf.clip_by_value(net,1e-10,1.0)))
     #opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
     var_name_list1 = ["W_conv","b_conv"]+hypernet_variable[0]
@@ -69,7 +75,7 @@ def run():
 
     sess = tf.Session()
 
-    correct_prediction = tf.equal(tf.argmax(net, 1), tf.argmax(Y, 1))
+    correct_prediction = tf.equal(tf.argmax(test_net, 1), tf.argmax(Y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
     saver = tf.train.Saver()
@@ -116,7 +122,7 @@ def run():
             #print(sess.run(tf.argmax(net, 1),feed_dict=feed_dict_train))
 
             sess.run([train_op], feed_dict=feed_dict_train)
-            
+
             #for z in (RF.Z_imagetest):
             #print(sess.run(net,feed_dict= feed_dict_train))
                 #assert(not np.isnan(sess.run(z,feed_dict=feed_dict_train)).any())
