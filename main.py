@@ -63,7 +63,9 @@ def run():
     hypernet = args.hyper_net  # tf.placeholder("string")
     task_name_tr = tf.placeholder("string")
     
-    net = RF.SDE_model(X,time_list,W_list,task_name,hypernet)
+    net = RF.SDE_model(X,time_list,W_list,task_name,hypernet,test=False)
+    test_net = RF.SDE_model(X,time_list,W_list,task_name,hypernet,test=True)
+    
     cross_entropy = -tf.reduce_sum(Y*tf.log(tf.clip_by_value(net,1e-10,1.0)))
     #opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
     var_name_list1 = ["W_conv","b_conv"]+hypernet_variable[0]
@@ -73,7 +75,7 @@ def run():
 
     sess = tf.Session()
 
-    correct_prediction = tf.equal(tf.argmax(net, 1), tf.argmax(Y, 1))
+    correct_prediction = tf.equal(tf.argmax(test_net, 1), tf.argmax(Y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
     saver = tf.train.Saver()

@@ -147,7 +147,7 @@ def variable(shape,var_name,Flow=False,init=None):
 
 
 
-def SDE_model(X,t,W,task_name_tr,hypernet):
+def SDE_model(X,t,W,task_name_tr,hypernet,test=False):
 
 
     depth =52
@@ -163,7 +163,7 @@ def SDE_model(X,t,W,task_name_tr,hypernet):
         delta_t = t[i]
         delta_W = W[i]
         t_now += delta_t
-        X_image = Res_flow(X_image,t_now,delta_t,delta_W,task_name_tr,i,hypernet)
+        X_image = Res_flow(X_image,t_now,delta_t,delta_W,task_name_tr,i,hypernet,test)
         #X_image=tf.Print(X_image,[X_image])
 
 
@@ -195,9 +195,9 @@ def SDE_model(X,t,W,task_name_tr,hypernet):
 
 
 
-def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr,count,hypernet):
+def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr,count,hypernet,f_test):
 
-    f_x = Res_func(inpt,task_name_tr,t_now,count,hypernet)
+    f_x = Res_func(inpt,task_name_tr,t_now,count,hypernet,f_test)
     p_t = p(t_now)
 
     if task_name_tr == "Milstein_scheme":
@@ -268,12 +268,8 @@ def hypernet1(t,W1,W2,b1,b2):
     return W1,W2,b1,b2
 
 
-def Res_func(inpt,task_name,t_now,count,hypernet):
-
-    if task_name=="test" or task_name=="ResNet_test":
-        is_training = False
-    else:
-        is_training = True
+def Res_func(inpt,task_name,t_now,count,hypernet,f_test):
+    is_training = not f_test
     if task_name == "ResNet" or task_name=="Stochastic_Depth" or task_name=="ResNet_test" :
         W_conv1 = variable([3, 3, 64, 64],"W_conv1"+str(count),True)
         b_conv1 = variable([64],"b_conv1"+str(count),True)
