@@ -147,7 +147,7 @@ def run():
                 }
             if SAVE_ENABLE :
                 print("saving checkpoint...")
-                saver.save(sess,"model/model.ckpt"+"step"+str(j)+datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
+                saver.save(sess,"model/model.ckpt"+str(task_name)+"step"+str(j)+datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
                 print("saved!")
             print( "accuracy after epoch %d : %.3f " % (j,sess.run(accuracy,feed_dict=feed_dict_test) ))
            # accuracy_summary = tf.scalar_summary("accuracy", accuracy)
