@@ -6,7 +6,7 @@ T = 1.0
 
 d=32*32*64
 
-VARIANCE = 1e-3
+VARIANCE = 1e-4
 
 
 def p(t):
@@ -130,6 +130,7 @@ def variable(shape,var_name,Flow=False,init=None):
 
     v=np.sqrt(VARIANCE)
     long = len(shape)
+    
 
     with tf.variable_scope('scope',reuse=tf.AUTO_REUSE):
         if init is None:
