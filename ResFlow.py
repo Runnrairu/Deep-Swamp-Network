@@ -6,6 +6,7 @@ T = 1.0
 
 d=32*32*64
 
+VARIANCE = 1e-2
 
 
 def p(t):
@@ -127,7 +128,7 @@ def conv2d(x, W):
 
 def variable(shape,var_name,Flow=False,init=None):
 
-    v=0.01
+    v=np.sqrt(VARIANCE)
     long = len(shape)
 
     with tf.variable_scope('scope',reuse=tf.AUTO_REUSE):
@@ -219,7 +220,7 @@ def batch_norm(X, axes, shape, is_training , id ,hypernet):
     # 平均と分散
     mean, variance = tf.nn.moments(X, axes)
     # scaleとoffsetも学習対象
-    
+
 
     scale = variable([shape],init=tf.ones([shape]),var_name="batch_scale_%s" % id )
     offset = variable([shape],init=tf.zeros([shape]),var_name="batch_offset_%s" % id )
