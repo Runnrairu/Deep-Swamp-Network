@@ -6,7 +6,7 @@ T = 1.0
 
 d=32*32*64
 
-VARIANCE = 1e-2
+VARIANCE = 1e-3
 
 
 def p(t):
