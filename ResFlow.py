@@ -274,10 +274,10 @@ def hypernet1(t,W1,W2,b1,b2):
 def Res_func(inpt,task_name,t_now,count,hypernet,f_test):
     is_training = not f_test
     if task_name == "ResNet" or task_name=="Stochastic_Depth" or task_name=="ResNet_test" :
-        W_conv1 = variable([3, 3, 64, 64],"W_conv1"+str(count),True)
-        b_conv1 = variable([64],"b_conv1"+str(count),True)
-        W_conv2 = variable([3, 3, 64, 64],"W_conv2"+str(count),True)
-        b_conv2 = variable([64],"b_conv2"+str(count),True)
+        W_conv1 = variable([3, 3, 64, 64],"W_conv1_"+str(count),True)
+        b_conv1 = variable([64],"b_conv1_"+str(count),True)
+        W_conv2 = variable([3, 3, 64, 64],"W_conv2_"+str(count),True)
+        b_conv2 = variable([64],"b_conv2_"+str(count),True)
 
     elif hypernet == "N" or hypernet == "1":
         W_conv1 = variable([3, 3, 64, 64],"W_conv1",True)
