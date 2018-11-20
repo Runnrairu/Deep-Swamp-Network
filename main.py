@@ -7,7 +7,7 @@ import os
 import datetime
 
 
-HYPER_NET = "N"
+HYPER_NET = "1"
 #HYPER_NET = "1"
 #HYPER_NET = "2"
 BATCH_SIZE = 64
@@ -25,7 +25,7 @@ GPU = 0
 # task_name = "Stochastic_Depth"
 # task_name = "ResNet_test"
 # task_name = "test"
-task_name = "ODEnet"
+task_name = "ODENet"
 
 depth=52
 
@@ -45,8 +45,10 @@ def run():
     parser.add_argument('-g', '--gpu', type=int, default=GPU)
     parser.add_argument('-t', '--task_name', type=str, default=task_name)
     parser.add_argument('-n', '--hyper_net', type=str, default=HYPER_NET)
-
+    parser.add_argument('-v', '--variance', type=float, default=RF.VARIANCE)
+    
     args = parser.parse_args()
+    RF.VARIANCE = args.variance
     directory_output = os.path.join(args.model_directory)
 
     X_train, Y_train, X_test, Y_test = load_data.load()
@@ -83,17 +85,17 @@ def run():
     num_data = X_train.shape[0]
 
 
-    with tf.variable_scope("scope", reuse=True ):
-        var_list1 = [ tf.get_variable(name=x) for x in var_name_list1 ]
-        var_list2 = [ tf.get_variable(name=x) for x in var_name_list2 ]
+    #with tf.variable_scope("scope", reuse=True ):
+    #    var_list1 = [ tf.get_variable(name=x) for x in var_name_list1 ]
+    #    var_list2 = [ tf.get_variable(name=x) for x in var_name_list2 ]
 
-    if task_name == "ResNet" or task_name =="ResNet_test" or task_name =="Stochastic_Depth":
-        learning_late = 1e-4
-    else:
-        learning_late = 1e-6
+#    if task_name == "ResNet" or task_name =="ResNet_test" or task_name =="Stochastic_Depth":
+#        learning_late = 1e-4
+#    else:
+#        learning_late = 1e-6
 #    train_op1 = tf.train.MomentumOptimizer( 1e-6 , 0.9 ).minimize(cross_entropy,var_list = var_list1 )  # tf.train.GradientDescentOptimizer(0.000001)
 #    train_op2 = tf.train.MomentumOptimizer( 1e-6 , 0.9 ).minimize(cross_entropy,var_list = var_list2 ) # tf.train.GradientDescentOptimizer(0.0001)
-    train_op = tf.train.MomentumOptimizer( learning_late , 0.9 ).minimize(cross_entropy) # tf.group(train_op1, train_op2)  # tf.train.GradientDescentOptimizer( 1e-6 ).minimize(cross_entropy) #
+    train_op = tf.train.MomentumOptimizer( args.learning_rate , 0.9 ).minimize(cross_entropy) # tf.group(train_op1, train_op2)  # tf.train.GradientDescentOptimizer( 1e-6 ).minimize(cross_entropy) #
 
     sess.run(tf.global_variables_initializer())
 
@@ -115,8 +117,7 @@ def run():
                 learning_rate: args.learning_rate,
                 time_list:t,
                 W_list:W,
-                task_name_tr:task_name
-                }
+                task_name_tr:task_name }
 
             #print(sess.run(net,feed_dict=feed_dict_train))
             #print(sess.run(tf.argmax(net, 1),feed_dict=feed_dict_train))
@@ -155,7 +156,10 @@ def run():
     total_parameters = 0
     parameters_string = ""
     for variable in tf.trainable_variables():
-
+        sess.run( tf.verify_tensor_all_finite(
+            variable ,
+            "NaN  in : %s \n" % variable.name
+        ) )
         shape = variable.get_shape()
         variable_parameters = 1
         for dim in shape:
