@@ -7,12 +7,12 @@ import os
 import datetime
 
 
-HYPER_NET = "1"
+HYPER_NET = "N"
 #HYPER_NET = "1"
 #HYPER_NET = "2"
 BATCH_SIZE = 64
-LEARNING_RATE = 1e-6
-EPOCH = 10
+LEARNING_RATE = 1e-5
+EPOCH = 100
 DATASET_DIRECTORY = "datasets"
 MODEL_DIRECTORY = "model"
 SAVE_ENABLE = False
@@ -48,14 +48,15 @@ def run():
     parser.add_argument('-v', '--variance', type=float, default=RF.VARIANCE)
     
     args = parser.parse_args()
+    task_name=args.task_name
     RF.VARIANCE = args.variance
     directory_output = os.path.join(args.model_directory)
 
     X_train, Y_train, X_test, Y_test = load_data.load()
 
     #縮小する
-    X_train, Y_train = X_train[0:5000], Y_train[0:5000]
-    X_test, Y_test = X_test[0:1000] , Y_test[0:1000]
+    #X_train, Y_train = X_train[0:5000], Y_train[0:5000]
+    #X_test, Y_test = X_test[0:1000] , Y_test[0:1000]
 
     X = tf.placeholder("float", [None, 32, 32, 3])
     Y = tf.placeholder("float", [None, 10])
@@ -73,7 +74,7 @@ def run():
     var_name_list1 = ["W_conv","b_conv"]+hypernet_variable[0]
     var_name_list2 = ["W_fc1","b_fc1","W_fc2","b_fc2","W_fc3","b_fc3"]
 
-    train_op = None
+    #train_op = None
 
     sess = tf.Session()
 
