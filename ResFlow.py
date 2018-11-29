@@ -149,10 +149,10 @@ def variable(shape,var_name,Flow=False,init=None):
 
 
 
-def SDE_model(X,t,W,task_name_tr,hypernet,test=False):
+def SDE_model(X,depth,t,W,task_name_tr,hypernet,test=False):
 
 
-    depth =52
+    
 
     W_conv = variable([5, 5, 3, 64],"W_conv")
     b_conv = variable([64],"b_conv")
