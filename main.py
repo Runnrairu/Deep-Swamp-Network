@@ -46,11 +46,16 @@ def run():
     parser.add_argument('-t', '--task_name', type=str, default=task_name)
     parser.add_argument('-n', '--hyper_net', type=str, default=HYPER_NET)
     parser.add_argument('-v', '--variance', type=float, default=RF.VARIANCE)
+    parser.add_argument('-de', '--depth', type=float, default=depth)
+    parser.add_argument('-ep', '--epoch', type=float, default=epoch)
+            
     
     args = parser.parse_args()
+    epoch=args.epoch
     task_name=args.task_name
     RF.VARIANCE = args.variance
     directory_output = os.path.join(args.model_directory)
+    depth = args.depth
 
     X_train, Y_train, X_test, Y_test = load_data.load()
 
@@ -66,8 +71,8 @@ def run():
     hypernet = args.hyper_net  # tf.placeholder("string")
     task_name_tr = tf.placeholder("string")
     
-    net = RF.SDE_model(X,time_list,W_list,task_name,hypernet,test=False)
-    test_net = RF.SDE_model(X,time_list,W_list,task_name,hypernet,test=True)
+    net = RF.SDE_model(X,depth,time_list,W_list,task_name,hypernet,test=False)
+    test_net = RF.SDE_model(X,depth,time_list,W_list,task_name,hypernet,test=True)
     
     cross_entropy = -tf.reduce_sum(Y*tf.log(tf.clip_by_value(net,1e-10,1.0)))
     #opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
