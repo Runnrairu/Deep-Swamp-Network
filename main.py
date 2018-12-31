@@ -106,9 +106,11 @@ def run():
     sess.run(tf.global_variables_initializer())
 
     print(tf.trainable_variables())
-
+    late_ad=1.0
     for j in range (EPOCH):
         sff_idx = np.random.permutation(num_data)
+        if j>50:
+            late_ad=0.1
         for idx in range(0, num_data, batch_size):
             batch_x = X_train[sff_idx[idx: idx + batch_size
             if idx + batch_size < num_data else num_data]]
@@ -120,7 +122,7 @@ def run():
             feed_dict_train={
                 X: batch_x,
                 Y: batch_y,
-                learning_rate: args.learning_rate,
+                learning_rate: args.learning_rate*late_ad,
                 time_list:t,
                 W_list:W,
                 task_name_tr:task_name }
