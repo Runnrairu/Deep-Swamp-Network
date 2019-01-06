@@ -178,7 +178,7 @@ def SDE_model(X,depth,t,W,task_name_tr,hypernet,test=False):
     W_fc1 = variable([8* 8 * 64,1024],"W_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
     b_fc1 = variable([1024],"b_fc1")
     X_pool_flat = tf.reshape(X_pool, [-1,  8* 8 * 64])#同じく
-    X_fc1 = tf.nn.relu(tf.matmul(X_pool_flat, W_fc1) + b_fc1)
+    X_fc1 = tf.nn.swish(tf.matmul(X_pool_flat, W_fc1) + b_fc1)
 
     #W_fc2 = variable([1024,1024],"W_fc2")
     #b_fc2 = variable([1024],"b_fc2")
@@ -233,7 +233,7 @@ def hypernet2(t):
     bias=64
     W_h1=variable([1,10],"W_h1",True)
     b_h1=variable([10],"b_h1",True)
-    x_h1=tf.nn.relu(tf.matmul(t, W_h1) + b_h1)
+    x_h1=tf.nn.swish(tf.matmul(t, W_h1) + b_h1)
     W_h3=variable([10,2*(conv+bias)],"W_h3",True)
     b_h3=variable([2*(conv+bias)],"b_h3",True)
     out = tf.matmul(x_h1, W_h3) + b_h3
@@ -253,10 +253,10 @@ def hypernet1(t,W1,W2,b1,b2):
     t=[[t]]
     W_h1=variable([1,100],"W_h1",True)
     b_h1=variable([100],"b_h1",True)
-    x_h1=tf.nn.relu(tf.matmul(t, W_h1) + b_h1)
+    x_h1=tf.nn.swish(tf.matmul(t, W_h1) + b_h1)
     W_h2=variable([100,100],"W_h2",True)
     b_h2=variable([100],"b_h2",True)
-    x_h2=tf.nn.relu(tf.matmul(x_h1, W_h2) + b_h2)
+    x_h2=tf.nn.swish(tf.matmul(x_h1, W_h2) + b_h2)
     W_h3=variable([100,128],"W_h3",True)
     b_h3=variable([128],"b_h3",True)
     out = tf.matmul(x_h2, W_h3) + b_h3
@@ -291,13 +291,13 @@ def Res_func(inpt,task_name,t_now,count,hypernet,f_test):
         W_conv1,W_conv2,b_conv1,b_conv2=hypernet2(t_now)
 
     if task_name == "ResNet" or task_name =="ResNet_test" or task_name =="Stochastic_Depth":
-        inpt = batch_norm(inpt,[0,1,2],64,is_training,"1_"+str(count),hypernet=hypernet)
-        inpt_ = tf.nn.relu(conv2d(inpt, W_conv1)+b_conv1)
-        inpt_ = batch_norm(inpt_,[0,1,2],64,is_training,"2_"+str(count),hypernet=hypernet)
+        #inpt = batch_norm(inpt,[0,1,2],64,is_training,"1_"+str(count),hypernet=hypernet)
+        inpt_ = tf.nn.swish(conv2d(inpt, W_conv1)+b_conv1)
+        #inpt_ = batch_norm(inpt_,[0,1,2],64,is_training,"2_"+str(count),hypernet=hypernet)
     else:
-        inpt = batch_norm(inpt,[0,1,2],64,is_training,"1",hypernet=hypernet)
-        inpt_ = tf.nn.relu(conv2d(inpt, W_conv1)+b_conv1)
-        inpt_ = batch_norm(inpt_,[0,1,2],64,is_training,"2",hypernet=hypernet)
+        #inpt = batch_norm(inpt,[0,1,2],64,is_training,"1",hypernet=hypernet)
+        inpt_ = tf.nn.swish(conv2d(inpt, W_conv1)+b_conv1)
+        #inpt_ = batch_norm(inpt_,[0,1,2],64,is_training,"2",hypernet=hypernet)
 
 
     output = conv2d(inpt_, W_conv2)+b_conv2
