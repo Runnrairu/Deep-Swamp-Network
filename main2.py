@@ -63,7 +63,7 @@ def run():
     Y_test_m=[0]*(10)
     for i in range(10):
         X_test_m[i]=X_test[i*1000:(i+1)*1000]
-        Y_test_m[i]=X_test[i*1000:(i+1)*1000]
+        Y_test_m[i]=Y_test[i*1000:(i+1)*1000]
 
 
     #縮小する
@@ -168,7 +168,7 @@ def run():
             acc=0
             for i in range(10):
                 feed_dict_test={
-                X: X_test[i],
+                X: X_test_m[i],
                 Y: Y_test_m[i],
                 time_list:t_test,
                 W_list:W_test,
