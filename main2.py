@@ -59,6 +59,12 @@ def run():
     depth = args.depth
 
     X_train, Y_train, X_test, Y_test = load_data.load()
+    X_test_m=[0]*(10)
+    Y_test_m=[0]*(10)
+    for i in range(10):
+        X_test_m[i]=X_test[i*1000:(i+1)*1000]
+        Y_test_m[i]=X_test[i*1000:(i+1)*1000]
+
 
     #縮小する
     #X_train, Y_train = X_train[0:5000], Y_train[0:5000]
@@ -159,7 +165,18 @@ def run():
                 print("saving checkpoint...")
                 saver.save(sess,"model/model.ckpt"+str(task_name)+"step"+str(j)+datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
                 print("saved!")
-            print( "accuracy after epoch %d : %.3f " % (j,sess.run(accuracy,feed_dict=feed_dict_test) ))
+            acc=0
+            for i in range(10):
+                feed_dict_test={
+                X: X_test[i],
+                Y: Y_test_m[i],
+                time_list:t_test,
+                W_list:W_test,
+                task_name_tr:task_name_test
+                }
+                acc+=sess.run(accuracy,feed_dict=feed_dict_test)
+            acc=acc/10.0    
+            print( "accuracy after epoch %d : %.3f " % (j,acc))
            # accuracy_summary = tf.scalar_summary("accuracy", accuracy)
     #ここからパラメータ数計算および列挙
     total_parameters = 0
