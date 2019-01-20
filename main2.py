@@ -116,8 +116,15 @@ def run():
     late_ad=1.0
     for j in range (EPOCH):
         sff_idx = np.random.permutation(num_data)
-        if j>50:
+        if j<20:
+            late_ad=1.0
+        elif j<40 :
             late_ad=0.1
+        elif j<60:
+            late_ad = 0.01
+        else:
+            late_ad = 0.001
+            
         for idx in range(0, num_data, batch_size):
             batch_x = X_train[sff_idx[idx: idx + batch_size
             if idx + batch_size < num_data else num_data]]
