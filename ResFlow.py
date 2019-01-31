@@ -6,7 +6,7 @@ T = 1.0
 
 d=32*32*64
 
-VARIANCE = 1e-4
+VARIANCE = 1e-5
 
 
 def p(t):
@@ -172,23 +172,23 @@ def SDE_model(X,depth,t,W,task_name_tr,hypernet,test=False):
 
 
     # 最大値プーリング(平均値のほうがよくない？)
-    X_pool = tf.nn.max_pool(X_image, ksize=[1, 4, 4, 1],strides=[1, 4, 4, 1],padding = "VALID")
-
+    X_pool = tf.nn.avg_pool(X_image, ksize=[1, 4, 4, 1],strides=[1, 4, 4, 1],padding = "VALID")
+    
     # 全結合層
     W_fc1 = variable([8* 8 * 64,1024],"W_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
     b_fc1 = variable([1024],"b_fc1")
     X_pool_flat = tf.reshape(X_pool, [-1,  8* 8 * 64])#同じく
     X_fc1 = tf.nn.swish(tf.matmul(X_pool_flat, W_fc1) + b_fc1)
 
-    #W_fc2 = variable([1024,1024],"W_fc2")
-    #b_fc2 = variable([1024],"b_fc2")
-    #X_fc2 = tf.matmul(X_fc1, W_fc2) + b_fc2
+    W_fc2 = variable([1024,1024],"W_fc2")
+    b_fc2 = variable([1024],"b_fc2")
+    X_fc2 = tf.matmul(X_fc1, W_fc2) + b_fc2
 
 
     # 出力層　　　　　　　　　
     W_fc3 = variable([1024, 10],"W_fc3")
     b_fc3 = variable([10],"b_fc3")
-    y_conv = tf.matmul(X_fc1, W_fc3) + b_fc3
+    y_conv = tf.matmul(X_fc2, W_fc3) + b_fc3
     #y_conv=tf.Print(y_conv,[y_conv])
     net=tf.nn.softmax(y_conv)
 
