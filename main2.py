@@ -18,7 +18,7 @@ DATASET_DIRECTORY = "datasets"
 MODEL_DIRECTORY = "model"
 SAVE_ENABLE = False
 GPU = 0
-#task_name="Fukasawa_scheme"
+task_name="Fukasawa_scheme"
 # task_name = "Simplicity_scheme"
 # task_name = "Euler_Maruyama_scheme"
 # task_name = "Milstein_scheme"
@@ -26,7 +26,7 @@ GPU = 0
 # task_name = "Stochastic_Depth"
 # task_name = "ResNet_test"
 # task_name = "test"
-task_name = "ODENet"
+#task_name = "ODENet"
 
 depth=52
 
