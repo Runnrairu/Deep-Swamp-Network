@@ -29,7 +29,7 @@ GPU = 0
 # task_name = "test"
 task_name = "ODENet"
 
-depth = 52
+depth = 152
 
 hypernet_variable = (["W_conv1", "b_conv1", "W_conv2", "b_conv2"],
                      ["W_conv1", "b_conv1", "W_conv2", "b_conv2",
@@ -115,8 +115,7 @@ def run():
 #    train_op1 = tf.train.MomentumOptimizer( 1e-6 , 0.9 ).minimize(cross_entropy,var_list = var_list1 )  # tf.train.GradientDescentOptimizer(0.000001)
 #    train_op2 = tf.train.MomentumOptimizer( 1e-6 , 0.9 ).minimize(cross_entropy,var_list = var_list2 ) # tf.train.GradientDescentOptimizer(0.0001)
     # tf.group(train_op1, train_op2)  # tf.train.GradientDescentOptimizer( 1e-6 ).minimize(cross_entropy) #
-    train_op = tf.train.MomentumOptimizer(
-        args.learning_rate, 0.9).minimize(loss)
+    train_op = tf.train.MomentumOptimizer(args.learning_rate, 0.9).minimize(loss)
 
     sess.run(tf.global_variables_initializer())
 
