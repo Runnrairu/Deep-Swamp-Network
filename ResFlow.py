@@ -23,13 +23,18 @@ def G_nm(n,t_now):
 
 
 
+
+
+
 def tW_def(n,task_name):
     t=[]
     W=[]
     if task_name == "Fukasawa_scheme":
         t,W = Fukasawa_scheme(n,T)
-    elif task_name == "Simplicity_scheme" or "Stochastic_Depth":
+    elif task_name == "Simplicity_scheme"
         t,W = Simplicity_scheme(n,T)
+    elif task_name == "Stochastic_Depth":
+        t,W = S_depth(n,T)
     elif task_name == "Euler_Maruyama_scheme" or task_name == "Milstein_scheme":
         t,W = Euler_Maruyama_scheme(n,T)
     elif task_name == "ODEnet" or task_name=="test" or task_name =="ResNet" or task_name =="ResNet_test":
@@ -96,7 +101,17 @@ def ODEnet(n,T):#先行研究
     return t,W
 
 
-
+def S_depth(n,T):
+    delta_t = float(T)/(n+1)
+    t = [delta_t]*(n+1)
+    W=[0.5]*(n+1)
+    a=[1,0]
+    t_now = 0
+    for i in range(n+1):
+        p_t=p(t_now)
+        W[i]=np.random.choice(a, size=None, replace=True, p=[p_t,1-p_t])
+        t_now += delta_t
+    return t,W
 
 
 def Simplicity_scheme(n,T):
