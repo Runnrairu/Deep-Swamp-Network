@@ -4,7 +4,7 @@ import numpy as np
 
 T = 1.0
 
-d=32*32*64
+d=32*32*66
 
 VARIANCE = 1e-5
 
