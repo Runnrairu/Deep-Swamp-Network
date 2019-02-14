@@ -168,10 +168,10 @@ def SDE_model(X,depth,t,W,task_name_tr,hypernet,test=False):
 
 
     
-
     
-    X_image = tf.reshape(X, [-1,32,32,66])
+    X_image = tf.reshape(X, [-1,32,32,3])
 
+    X_image=tf.tile(X_image,[1,1,1,22])
     
     t_now = 0
 
