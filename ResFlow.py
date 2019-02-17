@@ -31,7 +31,7 @@ def tW_def(n,task_name):
     W=[]
     if task_name == "Fukasawa_scheme":
         t,W = Fukasawa_scheme(n,T)
-    elif task_name == "Simplicity_scheme"
+    elif task_name == "Simplicity_scheme":
         t,W = Simplicity_scheme(n,T)
     elif task_name == "Stochastic_Depth":
         t,W = S_depth(n,T)
