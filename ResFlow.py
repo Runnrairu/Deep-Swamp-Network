@@ -214,12 +214,18 @@ def SDE_model(X,depth,t,W,task_name_tr,hypernet,test=False):
 def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr,count,hypernet,f_test):
     if task_name_tr=="Stochastic Depth" and delta_w==0:
         f_x=0
+    elif task_name_tr == "Milstein_scheme":
+        f_x,wxb=Res_func(inpt,task_name_tr,t_now,count,hypernet,f_test)
+        
+        
     else:
-        f_x = Res_func(inpt,task_name_tr,t_now,count,hypernet,f_test)
+        f_x,_ = Res_func(inpt,task_name_tr,t_now,count,hypernet,f_test)
+     
     p_t = p(t_now)
 
     if task_name_tr == "Milstein_scheme":
-        return inpt+p_t*delta_t*f_x +tf.pow(p_t*(1-p_t),0.5)*delta_w*f_x+mil()*(np.pow(delta_w,2)-delta_t)#ミルシュタインスキーム特有のやつ
+        
+        return inpt+p_t*delta_t*f_x +tf.pow(p_t*(1-p_t),0.5)*delta_w*f_x+mil_fx(inpt,task_name_tr,t_now,count,hypernet,f_test,f_x,wxb)*(np.pow(delta_w,2)-delta_t)#ミルシュタインスキーム特有のやつ
     elif task_name_tr =="ODEnet" or task_name_tr=="test" or task_name_tr =="ResNet" or task_name_tr =="ResNet_test":
         return inpt+delta_t*f_x
     elif task_name_tr=="Stochastic Depth":
@@ -290,6 +296,30 @@ def hypernet1(t,W1,W2,b1,b2):
     return W1,W2,b1,b2
 
 
+def mil_fx(inpt,task_name_tr,t_now,count,hypernet,f_test,f_x,wxb):
+    is_training = not f_test
+    
+        
+    if hypernet == "N" or hypernet == "1":
+        W_conv1 = variable([3, 3, 66, 66],"W_conv1",True)
+        b_conv1 = variable([66],"b_conv1",True)
+        W_conv2 = variable([3, 3, 66, 66],"W_conv2",True)
+        b_conv2 = variable([66],"b_conv2",True)
+        if hypernet=="1":
+            W_conv1,W_conv2,b_conv1,b_conv2=hypernet1(t_now,W_conv1,W_conv2,b_conv1,b_conv2)
+    elif hypernet=="2":
+        W_conv1,W_conv2,b_conv1,b_conv2=hypernet2(t_now)
+
+    #inpt = batch_norm(inpt,[0,1,2],66,is_training,"1",hypernet=hypernet)
+    inpt_ = conv2d(f_x, W_conv1)
+    #inpt_ = batch_norm(inpt_,[0,1,2],66,is_training,"2",hypernet=hypernet)
+
+
+    inpt_=tf.matmul(wxb,inpt_)
+    output = conv2d(inpt_, W_conv2)
+
+
+
 def Res_func(inpt,task_name,t_now,count,hypernet,f_test):
     is_training = not f_test
     if task_name == "ResNet" or task_name=="Stochastic_Depth" or task_name=="ResNet_test" :
@@ -312,6 +342,10 @@ def Res_func(inpt,task_name,t_now,count,hypernet,f_test):
         #inpt = batch_norm(inpt,[0,1,2],66,is_training,"1_"+str(count),hypernet=hypernet)
         inpt_ = tf.nn.swish(conv2d(inpt, W_conv1)+b_conv1)
         #inpt_ = batch_norm(inpt_,[0,1,2],66,is_training,"2_"+str(count),hypernet=hypernet)
+    elif task_name == "Milstein_scheme":
+        
+        wxb=conv2d(inpt, W_conv1)+b_conv1
+        inpt_=tf.nn.swish(wxb)
     else:
         #inpt = batch_norm(inpt,[0,1,2],66,is_training,"1",hypernet=hypernet)
         inpt_ = tf.nn.swish(conv2d(inpt, W_conv1)+b_conv1)
@@ -322,4 +356,4 @@ def Res_func(inpt,task_name,t_now,count,hypernet,f_test):
 
 
 
-    return output
+    return output,wxb
