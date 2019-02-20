@@ -2,7 +2,7 @@
 import tensorflow as tf
 import numpy as np
 
-T = 1.0
+T = 66.0
 
 d=32*32*66
 
@@ -10,7 +10,7 @@ VARIANCE = 1e-5
 
 
 def p(t):
-    p_T = 0.5
+    p_T = 0.3
 
     return 1-t/T*(1-p_T)
 
@@ -223,7 +223,7 @@ def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr,count,hypernet,f_test):
     elif task_name_tr =="ODEnet" or task_name_tr=="test" or task_name_tr =="ResNet" or task_name_tr =="ResNet_test":
         return inpt+delta_t*f_x
     elif task_name_tr=="Stochastic Depth":
-        return inpt+delta_t*f_x
+        return inpt+delta_t*delta_w*f_x
     else:
         return inpt+p_t*delta_t*f_x +tf.pow(p_t*(1-p_t),0.5)*delta_w*f_x
 
