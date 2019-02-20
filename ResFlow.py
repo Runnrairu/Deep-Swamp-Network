@@ -194,15 +194,15 @@ def SDE_model(X,depth,t,W,task_name_tr,hypernet,test=False):
     X_pool_flat = tf.reshape(X_pool, [-1,  8* 8 * 66])#同じく
     X_fc1 = tf.nn.swish(tf.matmul(X_pool_flat, W_fc1) + b_fc1)
 
-    W_fc2 = variable([1024,1024],"W_fc2")
-    b_fc2 = variable([1024],"b_fc2")
-    X_fc2 = tf.matmul(X_fc1, W_fc2) + b_fc2
+    #W_fc2 = variable([1024,1024],"W_fc2")
+    #b_fc2 = variable([1024],"b_fc2")
+    #X_fc2 = tf.matmul(X_fc1, W_fc2) + b_fc2
 
 
     # 出力層　　　　　　　　　
     W_fc3 = variable([1024, 10],"W_fc3")
     b_fc3 = variable([10],"b_fc3")
-    y_conv = tf.matmul(X_fc2, W_fc3) + b_fc3
+    y_conv = tf.matmul(X_fc1, W_fc3) + b_fc3
     #y_conv=tf.Print(y_conv,[y_conv])
     net=tf.nn.softmax(y_conv)
 
