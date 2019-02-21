@@ -219,7 +219,7 @@ def Res_flow(inpt,t_now,delta_t,delta_w,task_name_tr,count,hypernet,f_test):
         
         
     else:
-        f_x,_ = Res_func(inpt,task_name_tr,t_now,count,hypernet,f_test)
+        f_x,wxb = Res_func(inpt,task_name_tr,t_now,count,hypernet,f_test)
      
     p_t = p(t_now)
 
