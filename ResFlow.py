@@ -2,7 +2,7 @@
 import tensorflow as tf
 import numpy as np
 
-T = 66.0
+T = 30.0
 
 d=32*32*66
 
@@ -46,11 +46,26 @@ def tW_def(n,task_name):
 
 
 
+def tW_def_test(n,task_name):
+    t=[]
+    W=[]
+    if task_name=="test" or task_name =="ResNet_test":
+        t,W = ODEnet(n,T)
+    elif task_name== "Stochastic_Depth_test":
+        t,W = StochasticDepth_test(n,T)
+    return t,W
 
 
-
-
-
+def StochasticDepth_test(n,T):
+    t_now = 0
+    delta_t = float(T)/(n+1)
+    t = [delta_t]*(n+1)
+    W=[0]*(n+1)    
+    for i in range(n+1):
+        W[i]=p(t_now)
+        t_now +=delta_t
+    
+    return t,W
 
 
 
