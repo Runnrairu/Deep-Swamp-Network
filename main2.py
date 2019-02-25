@@ -163,8 +163,11 @@ def run():
         #    a=1
         if True or j == 0 or j % 10 == 9 or j+1 == EPOCH:  # 最初 , 10回ごと , 最後　のどれかならテストしてみる
             t_test, W_test = RF.tW_def(depth, "test")
-            if task_name == "ResNet" or task_name == "Stochastic_Depth":
+            if task_name == "ResNet":
                 task_name_test = "ResNet_test"
+            elif task_name == "Stochastic_Depth" :
+                task_name_test = "Stochastic_Depth_test"
+              
             else:
                 task_name_test = "test"
             feed_dict_test = {
