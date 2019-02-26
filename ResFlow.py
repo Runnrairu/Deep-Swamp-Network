@@ -337,7 +337,7 @@ def mil_fx(inpt,task_name_tr,t_now,count,hypernet,f_test,f_x,wxb):
 
 def Res_func(inpt,task_name,t_now,count,hypernet,f_test):
     is_training = not f_test
-    wkb=0
+    wxb=0
     if task_name == "ResNet" or task_name=="Stochastic_Depth" or task_name=="ResNet_test" :
         W_conv1 = variable([3, 3, 66, 66],"W_conv1_"+str(count),True)
         b_conv1 = variable([66],"b_conv1_"+str(count),True)
