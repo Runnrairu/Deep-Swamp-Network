@@ -86,7 +86,7 @@ def run():
                             task_name, hypernet, test=True)
 
     sess = tf.Session()
-    beta = 1e-3
+    beta = 1e-6
 
     cross_entropy = -tf.reduce_sum(Y*tf.log(tf.clip_by_value(net, 1e-10, 1.0)))
     suml2 = tf.add_n([tf.nn.l2_loss(v) for v in tf.trainable_variables()])
