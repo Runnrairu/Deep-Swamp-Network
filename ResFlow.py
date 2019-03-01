@@ -206,7 +206,7 @@ def SDE_model(X,depth,t,W,task_name_tr,hypernet,test=False):
     # 全結合層
     W_fc1 = variable([8* 8 * 510,1024],"W_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
     b_fc1 = variable([1024],"b_fc1")
-    X_pool_flat = tf.reshape(X_pool, [-1,  8* 8 * 66])#同じく
+    X_pool_flat = tf.reshape(X_pool, [-1,  8* 8 * 510])#同じく
     X_fc1 = tf.nn.swish(tf.matmul(X_pool_flat, W_fc1) + b_fc1)
 
     #W_fc2 = variable([1024,1024],"W_fc2")
