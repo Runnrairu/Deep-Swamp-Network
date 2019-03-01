@@ -186,7 +186,7 @@ def SDE_model(X,depth,t,W,task_name_tr,hypernet,test=False):
     
     X_image = tf.reshape(X, [-1,32,32,3])
 
-    X_image=tf.tile(X_image,[1,1,1,22])
+    X_image=tf.tile(X_image,[1,1,1,170])
     
     t_now = 0
 
@@ -204,7 +204,7 @@ def SDE_model(X,depth,t,W,task_name_tr,hypernet,test=False):
     X_pool = tf.nn.avg_pool(X_image, ksize=[1, 4, 4, 1],strides=[1, 4, 4, 1],padding = "VALID")
     
     # 全結合層
-    W_fc1 = variable([8* 8 * 66,1024],"W_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
+    W_fc1 = variable([8* 8 * 510,1024],"W_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
     b_fc1 = variable([1024],"b_fc1")
     X_pool_flat = tf.reshape(X_pool, [-1,  8* 8 * 66])#同じく
     X_fc1 = tf.nn.swish(tf.matmul(X_pool_flat, W_fc1) + b_fc1)
