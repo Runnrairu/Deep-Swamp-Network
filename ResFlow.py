@@ -186,7 +186,7 @@ def SDE_model(X,depth,t,W,task_name_tr,hypernet,test=False):
     
     X_image = tf.reshape(X, [-1,32,32,3])
 
-    X_image=tf.tile(X_image,[1,1,1,170])
+    X_image=tf.tile(X_image,[1,1,1,85])
     
     t_now = 0
 
@@ -204,9 +204,9 @@ def SDE_model(X,depth,t,W,task_name_tr,hypernet,test=False):
     X_pool = tf.nn.avg_pool(X_image, ksize=[1, 4, 4, 1],strides=[1, 4, 4, 1],padding = "VALID")
     
     # 全結合層
-    W_fc1 = variable([8* 8 * 510,1024],"W_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
+    W_fc1 = variable([8* 8 * 255,1024],"W_fc1")# ここの7はちゃんとプーリング後の大きさを正しく計算する。
     b_fc1 = variable([1024],"b_fc1")
-    X_pool_flat = tf.reshape(X_pool, [-1,  8* 8 * 510])#同じく
+    X_pool_flat = tf.reshape(X_pool, [-1,  8* 8 * 255])#同じく
     X_fc1 = tf.nn.swish(tf.matmul(X_pool_flat, W_fc1) + b_fc1)
 
     #W_fc2 = variable([1024,1024],"W_fc2")
@@ -268,8 +268,8 @@ def batch_norm(X, axes, shape, is_training , id ,hypernet):
 
 def hypernet2(t):
     t=[[t]]
-    conv=3*3*510*510
-    bias=510
+    conv=3*3*255*255
+    bias=255
     W_h1=variable([1,10],"W_h1",True)
     b_h1=variable([10],"b_h1",True)
     x_h1=tf.nn.swish(tf.matmul(t, W_h1) + b_h1)
@@ -283,8 +283,8 @@ def hypernet2(t):
     b1=out[0,conv:conv+bias]
     W2=out[0,conv+bias:2*conv+bias]
     b2=out[0,2*conv+bias:2*(conv+bias)]
-    W1=tf.reshape(W1,[3,3,510,510])
-    W2=tf.reshape(W2,[3,3,510,510])
+    W1=tf.reshape(W1,[3,3,255,255])
+    W2=tf.reshape(W2,[3,3,255,255])
 
     return W1,W2,b1,b2
 
@@ -296,13 +296,13 @@ def hypernet1(t,W1,W2,b1,b2):
     W_h2=variable([100,100],"W_h2",True)
     b_h2=variable([100],"b_h2",True)
     x_h2=tf.nn.swish(tf.matmul(x_h1, W_h2) + b_h2)
-    W_h3=variable([100,1020],"W_h3",True)
-    b_h3=variable([1020],"b_h3",True)
+    W_h3=variable([100,510],"W_h3",True)
+    b_h3=variable([510],"b_h3",True)
     out = tf.matmul(x_h2, W_h3) + b_h3
     param= tf.nn.sigmoid(out)
     #ここから分割
-    sigma1=param[0,0:510]
-    sigma2=param[0,510:1020]
+    sigma1=param[0,0:255]
+    sigma2=param[0,255:510]
 
     W1 = W1*sigma1
     b1 = b1*sigma1
@@ -339,16 +339,16 @@ def Res_func(inpt,task_name,t_now,count,hypernet,f_test):
     is_training = not f_test
     wxb=0
     if task_name == "ResNet" or task_name=="Stochastic_Depth" or task_name=="ResNet_test" :
-        W_conv1 = variable([3, 3, 510, 510],"W_conv1_"+str(count),True)
-        b_conv1 = variable([510],"b_conv1_"+str(count),True)
-        W_conv2 = variable([3, 3, 510, 510],"W_conv2_"+str(count),True)
-        b_conv2 = variable([510],"b_conv2_"+str(count),True)
+        W_conv1 = variable([3, 3, 255, 255],"W_conv1_"+str(count),True)
+        b_conv1 = variable([255],"b_conv1_"+str(count),True)
+        W_conv2 = variable([3, 3, 255, 255],"W_conv2_"+str(count),True)
+        b_conv2 = variable([255],"b_conv2_"+str(count),True)
 
     elif hypernet == "N" or hypernet == "1":
-        W_conv1 = variable([3, 3, 510, 510],"W_conv1",True)
-        b_conv1 = variable([510],"b_conv1",True)
-        W_conv2 = variable([3, 3, 510, 510],"W_conv2",True)
-        b_conv2 = variable([510],"b_conv2",True)
+        W_conv1 = variable([3, 3, 255, 255],"W_conv1",True)
+        b_conv1 = variable([255],"b_conv1",True)
+        W_conv2 = variable([3, 3, 255, 255],"W_conv2",True)
+        b_conv2 = variable([255],"b_conv2",True)
         if hypernet=="1":
             W_conv1,W_conv2,b_conv1,b_conv2=hypernet1(t_now,W_conv1,W_conv2,b_conv1,b_conv2)
     elif hypernet=="2":
